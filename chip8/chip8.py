@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, pygame, random, sys
+import argparse, pygame, random
 from pygame.locals import *
 
 class Chip8:
@@ -75,11 +75,7 @@ class Chip8:
                 if DT > 0: DT -= 1
                 if ST > 0: ST -= 1
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit(); sys.exit()
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            pygame.quit(); sys.exit()
+                    self.handle_event(event)
 
     def clear_screen(self):
         self.pixels = [0]*2048
@@ -108,13 +104,15 @@ class Chip8:
     def wait_for_key(self):
         while True:
             event = pygame.event.wait()
-            if event.type == pygame.QUIT:
-                pygame.quit(); sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit(); sys.exit()
-                elif event.key in self.keylist:
-                    return self.keylist.index(event.key)
+            self.handle_event(event)
+            if event.type == KEYDOWN and event.key in self.keylist:
+                return self.keylist.index(event.key)
+
+    def handle_event(self, event):
+        if event.type == QUIT:
+            pygame.quit(); raise SystemExit
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            pygame.quit(); raise SystemExit
 
 if __name__ == "__main__":
     c = Chip8()
