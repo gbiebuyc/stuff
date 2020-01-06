@@ -16,14 +16,13 @@ class Chip8:
         self.scale = args.scale
         with open(args.rom, 'rb') as f:
             rom = f.read()
-            mem[PC:PC+len(rom)] = rom
+        mem[PC:PC+len(rom)] = rom
         pygame.init()
         self.screen = pygame.display.set_mode((64*self.scale, 32*self.scale))
         self.clear_screen()
         clock = pygame.time.Clock()
         self.keylist = [K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_a, K_b, K_c, K_d, K_e, K_f]
-        font = 0xf0909090f02060202070f010f080f0f010f010f09090f01010f080f010f0f080f090f0f010204040f090f090f0f090f010f0f090f09090e090e090e0f0808080f0e0909090e0f080f080f0f080f08080
-        mem[0:16*5] = font.to_bytes(16*5, 'big')
+        mem[0:16*5] = bytes.fromhex('f0909090f02060202070f010f080f0f010f010f09090f01010f080f010f0f080f090f0f010204040f090f090f0f090f010f0f090f09090e090e090e0f0808080f0e0909090e0f080f080f0f080f08080')
         INSTR_PER_FRAME = 500//60
         nb_instr = 0
         while True:
