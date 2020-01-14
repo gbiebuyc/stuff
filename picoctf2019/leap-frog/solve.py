@@ -1,7 +1,7 @@
 from pwn import *
 
-p = process('./rop')
 b = ELF('./rop')
+p = b.process()
 
 gets_plt = b.symbols['gets']
 display_flag = b.symbols['display_flag']
