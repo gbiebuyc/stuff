@@ -1,0 +1,130 @@
+<canvas id=gc width="800" height="600"></canvas>
+
+<script>
+
+    let gc;
+    let ctx;
+    let bx, by;
+    let vx, vy;
+    let px = 0;
+    let py = 540;
+    let pw = 100;
+    let ph = 10;
+    const BRICK_W = 80;
+    const BRICK_H = 20;
+    const BRICK_GAP = 2;
+    const BRICK_COLS = 10;
+    const BRICK_ROWS = 14;
+    let brick_grid = Array(BRICK_COLS * BRICK_ROWS).fill();
+    let numbricks;
+
+    function reset_bricks() {
+        brick_grid = brick_grid.map((e, i) => (i >= 3 * BRICK_COLS));
+        numbricks = brick_grid.filter(v => v).length;
+    }
+
+    function reset_ball() {
+        bx = gc.width / 2;
+        by = gc.height / 2;
+        vx = 3;
+        vy = -3;
+    }
+
+    function get_tile_index(x, y) {
+        return (x + y * BRICK_COLS);
+    }
+
+    function check_brick(x, y) {
+        let col = Math.floor(x / BRICK_W);
+        let row = Math.floor(y / BRICK_H);
+        if (col < 0 || col >= BRICK_COLS ||
+            row < 0 || row >= BRICK_ROWS)
+            return;
+        let i = get_tile_index(col, row);
+        if (!brick_grid[i])
+            return;
+        let prev_col = Math.floor((bx - vx) / BRICK_W);
+        let prev_row = Math.floor((by - vy) / BRICK_H);
+        let both_tests_failed = true;
+        if (prev_col != col) {
+            let adjacent = get_tile_index(prev_col, row);
+            if (!brick_grid[adjacent]) {
+                vx *= -1;
+                both_tests_failed = false;
+            }
+        }
+        if (prev_row != row) {
+            let adjacent = get_tile_index(col, prev_row);
+            if (!brick_grid[adjacent]) {
+                vy *= -1;
+                both_tests_failed = false;
+            }
+        }
+        if (both_tests_failed) {
+            vx *= -1;
+            vy *= -1;
+        }
+        brick_grid[i] = 0;
+        numbricks--;
+        // console.log(numbricks);
+    }
+
+    function update() {
+        bx += vx;
+        by += vy;
+        if (bx < 0 || bx > gc.width)
+            vx *= -1;
+        if (by < 0)
+            vy *= -1;
+        if (by > gc.height)
+            reset_ball();
+        if (vy > 0 && by > py && by < py + ph) {
+            if (bx > px && bx < px + pw) {
+                vy *= -1;
+                vx = (bx - px - pw / 2) * 0.2;
+            }
+            if (!numbricks)
+                reset_bricks();
+        }
+        check_brick(bx, by);
+    }
+
+    function draw_bricks(params) {
+        for (let i = 0; i < BRICK_COLS; i++) {
+            for (let j = 0; j < BRICK_ROWS; j++) {
+                ctx.fillStyle = 'blue';
+                if (brick_grid[get_tile_index(i, j)])
+                    ctx.fillRect(i * BRICK_W, j * BRICK_H,
+                        BRICK_W - BRICK_GAP, BRICK_H - BRICK_GAP);
+            }
+        }
+    }
+
+    function draw() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, gc.width, gc.height);
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(bx, by, 10, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillRect(px, py, pw, ph);
+        draw_bricks();
+    }
+
+    window.onload = function () {
+        gc = document.getElementById('gc');
+        ctx = gc.getContext('2d');
+        reset_ball();
+        reset_bricks();
+        gc.addEventListener('mousemove', function (e) {
+            px = e.clientX - gc.getBoundingClientRect().left - pw / 2;
+            // bx = e.clientX - gc.getBoundingClientRect().left;
+            // by = e.clientY - gc.getBoundingClientRect().top;
+        })
+        setInterval(function () {
+            update();
+            draw();
+        }, 16)
+    }
+
+</script>

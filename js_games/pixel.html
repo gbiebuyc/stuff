@@ -1,0 +1,38 @@
+<canvas id='c' width=800 height=600></canvas>
+
+<script>
+
+    c = document.getElementById('c');
+    ctx = c.getContext('2d');
+    W = c.width;
+    H = c.height;
+    imgData = ctx.createImageData(W, H);
+    pixels = new Uint32Array(imgData.data.buffer);
+    xoff = 0;
+    yoff = 0;
+
+    function putPixel(x, y, col) {
+        pixels[y * W + x] = col;
+    }
+
+    function draw() {
+
+        for (x = 0; x < W; x++) {
+            for (y = 0; y < H; y++) {
+                col = (0xff << 24) |
+                    (((x + xoff) & 0xff) << 16) |
+                    (((y + yoff) & 0xff) << 8) |
+                    (((x - xoff) & 0xff) << 0);
+                putPixel(x, y, col);
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    setInterval(function () {
+        draw();
+        xoff++;
+        yoff++;
+    })
+
+</script>

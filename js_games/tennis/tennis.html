@@ -1,0 +1,122 @@
+<canvas id="gc" width="800" height="600"></canvas>
+
+<script>
+
+    let canvas;
+    let ctx;
+    let x_ball;
+    let y_ball;
+    let vx = 6;
+    let vy = 1;
+    let paddle1y = 250;
+    let paddle2y = 250;
+    const PADDLE_HEIGHT = 100;
+    const PADDLE_THICKNESST = 10;
+    let score1 = 0;
+    let score2 = 0;
+    const AI_SPEED = 5;
+    const MAX_SCORE = 3;
+    let showing_win_screen = false;
+
+    function reset_ball() {
+        if (score1 >= MAX_SCORE || score2 >= MAX_SCORE) {
+            showing_win_screen = true;
+            canvas.addEventListener('mousedown', function handle_click(e) {
+                canvas.removeEventListener("mousedown", handle_click);
+                showing_win_screen = false;
+                score1 = 0;
+                score2 = 0;
+            })
+        }
+        x_ball = canvas.width / 2;
+        y_ball = canvas.height / 2;
+        vx *= -1
+    }
+
+    function draw() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'white';
+
+        if (!showing_win_screen) {
+            ctx.beginPath();
+            ctx.arc(x_ball, y_ball, 10, 0, Math.PI * 2, true);
+            ctx.fill();
+            ctx.fillRect(0, paddle1y, PADDLE_THICKNESST, PADDLE_HEIGHT);
+            ctx.fillRect(canvas.width - PADDLE_THICKNESST, paddle2y,
+                PADDLE_THICKNESST, PADDLE_HEIGHT);
+            for (let y = 0; y < canvas.height; y += 40)
+                ctx.fillRect(canvas.width / 2, y, 2, 20);
+        }
+        ctx.font = "30px serif";
+        ctx.textAlign = 'center';
+        ctx.fillText(score1, 100, 50);
+        ctx.fillText(score2, canvas.width - 100, 50);
+        if (showing_win_screen) {
+            ctx.fillText((score1 == MAX_SCORE) ? 'left won' : 'right won',
+                canvas.width / 2, canvas.height / 2);
+            ctx.fillText('Click to start a new match',
+                canvas.width / 2, canvas.height / 2 + 100);
+        }
+    }
+
+    function update() {
+        if (showing_win_screen)
+            return;
+        if (y_ball < (paddle2y + PADDLE_HEIGHT / 2 - 35))
+            paddle2y -= AI_SPEED;
+        if (y_ball > (paddle2y + PADDLE_HEIGHT / 2 + 35))
+            paddle2y += AI_SPEED;
+        if (x_ball > canvas.width)
+            if (y_ball > paddle2y && y_ball < paddle2y + PADDLE_HEIGHT) {
+                vx *= -1;
+                vy = (y_ball - paddle2y - PADDLE_HEIGHT / 2) * 0.2;
+            }
+            else {
+                score1++;
+                reset_ball();
+            }
+        if (x_ball < 0) {
+            if (y_ball > paddle1y && y_ball < paddle1y + PADDLE_HEIGHT) {
+                vx *= -1;
+                vy = (y_ball - paddle1y - PADDLE_HEIGHT / 2) * 0.2;
+            }
+            else {
+                score2++;
+                reset_ball();
+            }
+        }
+        if (y_ball > canvas.height || y_ball < 0)
+            vy *= -1;
+        x_ball += vx;
+        y_ball += vy;
+    }
+
+    function draw_win_screen() {
+
+    }
+
+    function get_mouse_pos(e) {
+        let rect = canvas.getBoundingClientRect();
+        let root = document.documentElement;
+        let x = e.clientX - rect.left - root.scrollLeft;
+        let y = e.clientY - rect.top - root.scrollTop;
+        return { x: x, y: y };
+    }
+
+    window.onload = function () {
+        canvas = document.getElementById('gc');
+        ctx = canvas.getContext('2d');
+        canvas.addEventListener('mousemove', function (e) {
+            let mouse_pos = get_mouse_pos(e);
+            paddle1y = mouse_pos.y - PADDLE_HEIGHT * 0.5;
+        })
+        reset_ball();
+        timer = setInterval(function () {
+            update();
+            draw();
+        }, 20)
+    }
+
+</script>
