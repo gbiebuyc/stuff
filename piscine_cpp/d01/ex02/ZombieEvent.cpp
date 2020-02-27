@@ -20,12 +20,12 @@ ZombieEvent::~ZombieEvent(void) {
 }
 
 std::string ZombieEvent::_randomNames[6] = {
-    "hey",
-    "yolo",
-    "bruh",
-    "foo",
-    "bar",
-    "dick"
+    "Hey",
+    "Yolo",
+    "Bruh",
+    "Foo",
+    "Bar",
+    "Dick"
 };
 
 void ZombieEvent::setZombieType(std::string type) {
