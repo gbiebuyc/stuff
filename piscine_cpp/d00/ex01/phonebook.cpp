@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include <iostream>
-#include <vector>
 #include "Contact.hpp"
 
 int main()
