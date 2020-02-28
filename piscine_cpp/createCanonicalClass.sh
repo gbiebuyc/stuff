@@ -10,6 +10,7 @@ public:
     ~$1(void);
     $1 &operator=($1 const &rhs);
 };\n
+std::ostream &operator<<(std::ostream &o, $1 const &rhs);\n
 #endif" >> $1.hpp
 
 vim -c ':normal dG' -c ':Stdheader' -c ':normal dd' -c ':x' $1.cpp
@@ -24,4 +25,8 @@ $1::~$1(void) {
 $1 &$1::operator=($1 const &rhs) {
     // _foo = rhs.getFoo();
     return *this;
+}\n
+std::ostream &operator<<(std::ostream &o, $1 const &rhs) {
+    //o << \"The value of _foo is: \" << rhs.getFoo();
+    return o;
 }" >> $1.cpp
