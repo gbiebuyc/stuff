@@ -33,8 +33,23 @@ Fixed &Fixed::operator=(Fixed const &rhs) {
 }
 
 Fixed Fixed::operator+(Fixed const &rhs) const {
-    Fixed new = *this;
-    return Fixed(_value + rhs.getRawBits());
+    Fixed f = *this;
+    f.setRawBits(f.getRawBits() + rhs.getRawBits());
+    return f;
+}
+
+Fixed Fixed::operator-(Fixed const &rhs) const {
+    Fixed f = *this;
+    f.setRawBits(f.getRawBits() - rhs.getRawBits());
+    return f;
+}
+
+Fixed Fixed::operator*(Fixed const &rhs) const {
+    return Fixed(toFloat() * rhs.toFloat());
+}
+
+Fixed Fixed::operator/(Fixed const &rhs) const {
+    return Fixed(toFloat() / rhs.toFloat());
 }
 
 std::ostream &operator<<(std::ostream &o, Fixed const &rhs) {

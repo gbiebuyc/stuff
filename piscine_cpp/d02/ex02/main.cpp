@@ -25,5 +25,5 @@ int main( void ) {
     // std::cout << Fixed::max( a, b ) << std::endl;
     // return 0;
 
-    std::cout << Fixed(3.14f) + Fixed(2) << std::endl;
+    std::cout << Fixed(3.14f) / Fixed(2) << std::endl;
 }
