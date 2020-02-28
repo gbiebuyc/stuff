@@ -33,12 +33,11 @@ Fixed &Fixed::operator=(Fixed const &rhs) {
 }
 
 std::ostream &operator<<(std::ostream &o, Fixed const &rhs) {
-    //o << "The value of _foo is: " << rhs.getFoo();
+    o << rhs.toFloat();
     return o;
 }
 
 int Fixed::getRawBits(void) const {
-    std::cout << "getRawBits member function called\n";
     return (_value);
 }
 
@@ -56,5 +55,13 @@ Fixed::Fixed(int const i) {
 
 Fixed::Fixed(float const f) {
     std::cout << "Float constructor called\n";
-    _value = (int)(f * pow(10, _numFractBits));
+    _value = (int)(f * (1 << _numFractBits));
+}
+
+float Fixed::toFloat(void) const {
+    return ((float)_value / (float)(1 << _numFractBits));
+}
+
+int Fixed::toInt(void) const {
+    return (_value >> _numFractBits);
 }
