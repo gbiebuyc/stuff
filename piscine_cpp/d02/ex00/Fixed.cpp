@@ -45,3 +45,5 @@ void Fixed::setRawBits(int raw) {
     std::cout << "setRawBits member function called\n";
     _value = raw;
 }
+
+const int Fixed::_numFractBits = 8;
