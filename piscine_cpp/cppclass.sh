@@ -1,21 +1,27 @@
 vim -c ':normal dG' -c ':Stdheader' -c ':normal dd' -c ':x' $1.hpp
-echo -e "#ifndef $(echo $1 | tr a-z A-Z)_HPP" >> $1.hpp
-echo -e "# define $(echo $1 | tr a-z A-Z)_HPP\n" >> $1.hpp
-echo -e "#include <iostream>\n" >> $1.hpp
-echo -e "class $1" >> $1.hpp
-echo -e "{" >> $1.hpp
-echo -e "private:" >> $1.hpp
-echo -e "" >> $1.hpp
-echo -e "public:" >> $1.hpp
-echo -e "    $1();" >> $1.hpp
-echo -e "    ~$1();" >> $1.hpp
-echo -e "};\n" >> $1.hpp
-echo -e "#endif" >> $1.hpp
+echo -e "#ifndef $(echo $1 | tr a-z A-Z)_HPP
+# define $(echo $1 | tr a-z A-Z)_HPP\n
+#include <iostream>\n
+class $1 {
+private:\n
+public:
+    $1(void);
+    $1($1 const & src);
+    ~$1(void);
+    $1 &operator=($1 const &rhs);
+};\n
+#endif" >> $1.hpp
 
 vim -c ':normal dG' -c ':Stdheader' -c ':normal dd' -c ':x' $1.cpp
-echo -e "#include \"$1.hpp\"\n" >> $1.cpp
-echo -e "$1::$1(void) {" >> $1.cpp
-echo -e "}" >> $1.cpp
-echo -e "" >> $1.cpp
-echo -e "$1::~$1(void) {" >> $1.cpp
-echo -e "}" >> $1.cpp
+echo -e "#include \"$1.hpp\"\n
+$1::$1(void) {
+}\n
+$1::$1($1 const &src) {
+    *this = src;
+}\n
+$1::~$1(void) {
+}\n
+$1 &$1::operator=($1 const &rhs) {
+    // _foo = rhs.getFoo();
+    return *this;
+}" >> $1.cpp
