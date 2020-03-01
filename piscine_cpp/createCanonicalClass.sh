@@ -3,12 +3,12 @@ echo -e "#ifndef $(echo $1 | tr a-z A-Z)_HPP
 # define $(echo $1 | tr a-z A-Z)_HPP\n
 #include <iostream>\n
 class $1 {
-private:\n
 public:
     $1(void);
     $1($1 const & src);
-    ~$1(void);
+    virtual ~$1(void);
     $1 &operator=($1 const &rhs);
+private:
 };\n
 std::ostream &operator<<(std::ostream &o, $1 const &rhs);\n
 #endif" >> $1.hpp

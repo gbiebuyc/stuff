@@ -1,31 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Bureaucrat.hpp                                     :+:      :+:    :+:   */
+/*   Form.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gbiebuyc <gbiebuyc@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/03/01 18:01:39 by gbiebuyc          #+#    #+#             */
-/*   Updated: 2020/03/01 18:01:39 by gbiebuyc         ###   ########.fr       */
+/*   Created: 2020/03/01 20:28:18 by gbiebuyc          #+#    #+#             */
+/*   Updated: 2020/03/01 20:28:18 by gbiebuyc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BUREAUCRAT_HPP
-# define BUREAUCRAT_HPP
+#ifndef FORM_HPP
+# define FORM_HPP
 
 #include <iostream>
+#include "Bureaucrat.hpp"
 
-class Bureaucrat {
+class Bureaucrat;
+
+class Form {
 private:
-    Bureaucrat(void);
+    Form(void);
     std::string const _name;
-    int _grade;
-    void setGrade(int grade);
+    bool _signed;
+    int const _gradeRequiredToSign;
+    int const _gradeRequiredToExec;
 public:
-    Bureaucrat(std::string name, int grade);
-    Bureaucrat(Bureaucrat const & src);
-    virtual ~Bureaucrat(void);
-    Bureaucrat &operator=(Bureaucrat const &rhs);
+    Form(std::string name, int gradeRequiredToSign, int gradeRequiredToExec);
+    Form(Form const & src);
+    virtual ~Form(void);
+    Form &operator=(Form const &rhs);
     class GradeTooHighException : public std::exception {
     public:
         GradeTooHighException(void);
@@ -43,11 +47,12 @@ public:
         virtual const char *what() const throw();
     };
     std::string getName(void) const;
-    int getGrade(void) const;
-    void incrementGrade(void);
-    void decrementGrade(void);
+    bool getSigned(void) const;
+    int getGradeRequiredToSign(void) const;
+    int getGradeRequiredToExec(void) const;
+    void beSigned(Bureaucrat &b);
 };
 
-std::ostream &operator<<(std::ostream &o, Bureaucrat const &rhs);
+std::ostream &operator<<(std::ostream &o, Form const &rhs);
 
 #endif
