@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME = a.out
+NAME = convert
 SRC = main.cpp
 OBJ = $(addprefix ./obj/, $(SRC:.cpp=.o))
 CXX	= clang++
