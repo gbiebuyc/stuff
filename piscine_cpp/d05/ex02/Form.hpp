@@ -20,7 +20,8 @@ class Bureaucrat;
 
 class Form {
 public:
-    Form(std::string name, int gradeRequiredToSign, int gradeRequiredToExec);
+    Form(void);
+    Form(std::string name, std::string target, int gradeRequiredToSign, int gradeRequiredToExec);
     Form(Form const & src);
     virtual ~Form(void);
     Form &operator=(Form const &rhs);
@@ -55,13 +56,12 @@ public:
     void beSigned(Bureaucrat &b);
     void execute(Bureaucrat const &) const;
 private:
-    Form(void);
     std::string const _name;
     bool _signed;
     int const _gradeRequiredToSign;
     int const _gradeRequiredToExec;
     std::string const _target;
-    void _execute(void) const = 0;
+    virtual void _execute(void) const = 0;
 };
 
 std::ostream &operator<<(std::ostream &o, Form const &rhs);

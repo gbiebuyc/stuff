@@ -12,11 +12,11 @@
 
 #include "ShrubberyCreationForm.hpp"
 
-ShrubberyCreationForm::ShrubberyCreationForm(void) {
+ShrubberyCreationForm::ShrubberyCreationForm(std::string target) :
+    Form("ShrubberyCreationForm", target, 145, 137) {
 }
 
 ShrubberyCreationForm::ShrubberyCreationForm(ShrubberyCreationForm const &src) {
-    *this = src;
 }
 
 ShrubberyCreationForm::~ShrubberyCreationForm(void) {
@@ -30,4 +30,8 @@ ShrubberyCreationForm &ShrubberyCreationForm::operator=(ShrubberyCreationForm co
 std::ostream &operator<<(std::ostream &o, ShrubberyCreationForm const &rhs) {
     //o << "The value of _foo is: " << rhs.getFoo();
     return o;
+}
+
+void ShrubberyCreationForm::_execute(void) const {
+    std::cout << "executing" << std::endl;
 }

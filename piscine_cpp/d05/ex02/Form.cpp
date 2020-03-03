@@ -17,8 +17,9 @@ Form::Form(void) :
     _gradeRequiredToExec(0) {
 }
 
-Form::Form(std::string name, int gradeRequiredToSign, int gradeRequiredToExec) :
+Form::Form(std::string name, std::string target, int gradeRequiredToSign, int gradeRequiredToExec) :
     _name(name),
+    _target(target),
     _signed(false),
     _gradeRequiredToSign(gradeRequiredToSign),
     _gradeRequiredToExec(gradeRequiredToExec) {
@@ -71,6 +72,8 @@ void Form::beSigned(Bureaucrat &b) {
 void Form::execute(Bureaucrat const &b) const {
     if (!_signed)
         throw Form::NotSignedException();
+    if (b.getGrade() > _gradeRequiredToExec)
+        throw Form::GradeTooLowException();
     _execute();
 }
 

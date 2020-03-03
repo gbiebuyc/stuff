@@ -24,6 +24,7 @@ public:
     ShrubberyCreationForm &operator=(ShrubberyCreationForm const &rhs);
 private:
     ShrubberyCreationForm(void);
+    virtual void _execute(void) const;
 };
 
 std::ostream &operator<<(std::ostream &o, ShrubberyCreationForm const &rhs);
