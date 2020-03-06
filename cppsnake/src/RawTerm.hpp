@@ -22,22 +22,16 @@ class RawTerm {
 public:
 	RawTerm() {enableRawMode();}
 	~RawTerm() {disableRawMode();}
-	void doStuff() {
-		for (int i = 0; i < 10; i++)
-			std::cout << "\n";
-		std::cout << "hello" << std::flush;
-		sleep(1);
-	}
 private:
-	struct termios orig_termios;
+	struct termios _orig_termios;
 	void disableRawMode() {
-	  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
+	  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &_orig_termios) == -1)
 		throw std::runtime_error("tcsetattr");
 	}
 	void enableRawMode() {
-	  if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
+	  if (tcgetattr(STDIN_FILENO, &_orig_termios) == -1)
 		throw std::runtime_error("tcsetattr");
-	  struct termios raw = orig_termios;
+	  struct termios raw = _orig_termios;
 	  raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
 	  raw.c_oflag &= ~(OPOST);
 	  raw.c_cflag |= (CS8);

@@ -19,8 +19,15 @@
 class Game {
 public:
 	void Loop() {
+		for (int i = 0; i < 10; i++) std::cout << "\r\n";
 		while (true) {
-			_term.doStuff();
+			std::cout << "\e[10A" << std::flush;
+			std::cout << "\e[J" << std::flush;
+			for (int i = 0; i < 5; i++) std::cout << "\r\n";
+			for (int i = 0; i < _x; i++) std::cout << " ";
+			std::cout << "hello" << std::flush;
+			for (int i = 0; i < 5; i++) std::cout << "\r\n";
+			sleep(1);
 			_x++;
 		}
 	}
