@@ -10,6 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef RAWTERM_HPP
+#define RAWTERM_HPP
+
 #include <termios.h>
 #include <unistd.h>
 #include <iostream>
@@ -17,12 +20,13 @@
 
 class RawTerm {
 public:
-	RawTerm() {
-		enableRawMode();
-		doStuff(); 
-	}
-	~RawTerm() {
-		disableRawMode();
+	RawTerm() {enableRawMode();}
+	~RawTerm() {disableRawMode();}
+	void doStuff() {
+		for (int i = 0; i < 10; i++)
+			std::cout << "\n";
+		std::cout << "hello" << std::flush;
+		sleep(1);
 	}
 private:
 	struct termios orig_termios;
@@ -37,14 +41,12 @@ private:
 	  raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
 	  raw.c_oflag &= ~(OPOST);
 	  raw.c_cflag |= (CS8);
-	  raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+	  raw.c_lflag &= ~(ECHO | ICANON | IEXTEN);
 	  raw.c_cc[VMIN] = 0;
 	  raw.c_cc[VTIME] = 1;
 	  if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
 		throw std::runtime_error("tcsetattr");
 	}
-	void doStuff() {
-		std::cout << "hello" << std::flush;
-		sleep(1);
-	}
 };
+
+#endif

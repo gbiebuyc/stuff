@@ -1,25 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Game.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gbiebuyc <gbiebuyc@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/03/06 16:48:44 by gbiebuyc          #+#    #+#             */
-/*   Updated: 2020/03/06 16:48:44 by gbiebuyc         ###   ########.fr       */
+/*   Created: 2020/03/06 18:58:43 by gbiebuyc          #+#    #+#             */
+/*   Updated: 2020/03/06 18:58:43 by gbiebuyc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Game.hpp"
-#include <iostream>
-#include <stdexcept>
+#ifndef GAME_HPP
+#define GAME_HPP
 
-int main() {
-	try {
-		Game game;
-		game.Loop();
+#include "RawTerm.hpp"
+#include <iostream>
+
+class Game {
+public:
+	void Loop() {
+		while (true) {
+			_term.doStuff();
+			_x++;
+		}
 	}
-	catch (std::exception &e) {
-		std::cerr << "Snake: Exception: " << e.what() << std::endl;
-	}
-}
+private:
+	RawTerm _term;
+	int _x = 0;
+};
+
+#endif
