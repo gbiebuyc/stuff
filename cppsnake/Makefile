@@ -12,8 +12,10 @@
 
 .PHONY: clean re
 
+CXXFLAGS = -g
+
 snake: ./src/*
-	g++ -o $@ $^
+	g++ $(CXXFLAGS) -o $@ $^
 
 clean:
 	rm -rf snake
