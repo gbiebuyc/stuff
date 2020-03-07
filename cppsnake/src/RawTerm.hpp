@@ -31,7 +31,7 @@ public:
         moveCursorBottomLeft();
         if (p.y) std::cout << "\e[" << 24 - p.y - 1 << UP;
         if (p.x) std::cout << "\e[" << p.x << RIGHT;
-        std::cout << 'X' << std::flush;
+        std::cout << '#' << std::flush;
     }
 
     void moveCursorBottomLeft() const {

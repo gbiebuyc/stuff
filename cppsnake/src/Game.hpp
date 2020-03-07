@@ -36,6 +36,7 @@ public:
             readInput();
             if (_snake.advanceSnake() == false)
                 break;
+            _snake.checkFood(_food);
         }
     }
 

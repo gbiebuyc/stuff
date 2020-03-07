@@ -23,13 +23,15 @@ public:
     Food() {
         srand (time(NULL));
         spawnNewFood();
+        spawnNewFood();
+        spawnNewFood();
     }
 
     std::list<Cell> const &getCells() const {
         return _cells;
     }
 
-    void eatFood(Cell &food) {
+    void eat(Cell const &food) {
         _cells.remove(food);
     }
 
