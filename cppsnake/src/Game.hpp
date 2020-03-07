@@ -33,9 +33,7 @@ public:
         while (true) {
             std::cout << "\e[23" << UP << "\e[J";
             draw();
-            std::cout << "\e[999" << DOWN;
-            std::cout << "\e[999" << LEFT;
-            std::cout << std::flush;
+            _term.moveCursorBottomLeft();
             usleep(500000);
             readInput();
             _snake.advanceSnake();

@@ -24,11 +24,16 @@ public:
     ~RawTerm() {disableRawMode();}
 
     void putBlock(t_point const &p) const {
-        std::cout << "\e[999" << DOWN;
-        std::cout << "\e[999" << LEFT;
+        moveCursorBottomLeft();
         if (p.y) std::cout << "\e[" << 24 - p.y - 1 << UP;
         if (p.x) std::cout << "\e[" << p.x << RIGHT;
         std::cout << 'X' << std::flush;
+    }
+
+    void moveCursorBottomLeft() const {
+        std::cout << "\e[999" << DOWN;
+        std::cout << "\e[999" << LEFT;
+        std::cout << std::flush;
     }
 
 private:
