@@ -12,7 +12,7 @@
 
 .PHONY: clean re
 
-CXXFLAGS = -g
+CXXFLAGS = -Wall -Wextra
 
 snake: ./src/*
 	g++ $(CXXFLAGS) -o $@ $^

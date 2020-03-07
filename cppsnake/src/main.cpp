@@ -15,11 +15,11 @@
 #include <stdexcept>
 
 int main() {
-	try {
-		Game game;
-		game.Loop();
-	}
-	catch (std::exception &e) {
-		std::cerr << "Snake: Exception: " << e.what() << std::endl;
-	}
+    try {
+        Game game;
+        game.Loop();
+    }
+    catch (std::exception &e) {
+        std::cerr << "Snake: Exception: " << e.what() << std::endl;
+    }
 }
