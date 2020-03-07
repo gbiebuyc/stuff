@@ -35,11 +35,12 @@ public:
         return true;
     }
 
-    void checkCollisions() {
+    Cell &checkFood(Food &food) {
         Cell head = _cells.back();
+        for (auto &cell : food.getCells()) {
+            if (
+        }
     }
-
-    //void checkFood(std::list<Cell> food)
 
     std::list<Cell> const &getCells() const {
         return _cells;
