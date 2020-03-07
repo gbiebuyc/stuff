@@ -12,8 +12,42 @@
 
 snake
 
-# Created by https://www.gitignore.io/api/vim,linux,macos,windows,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=vim,linux,macos,windows,visualstudiocode
+# Created by https://www.gitignore.io/api/vim,c++,linux,macos,windows
+# Edit at https://www.gitignore.io/?templates=vim,c++,linux,macos,windows
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
 
 ### Linux ###
 *~
@@ -82,17 +116,6 @@ tags
 # Coc configuration directory
 .vim
 
-### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-.history
-
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -119,4 +142,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.gitignore.io/api/vim,linux,macos,windows,visualstudiocode
+# End of https://www.gitignore.io/api/vim,c++,linux,macos,windows

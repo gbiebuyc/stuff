@@ -14,8 +14,8 @@
 
 CXXFLAGS = -Wall -Wextra
 
-snake: ./src/*
-	g++ $(CXXFLAGS) -o $@ $^
+snake: src/*
+	g++ $(CXXFLAGS) -o $@ src/main.cpp
 
 clean:
 	rm -rf snake

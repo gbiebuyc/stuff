@@ -22,12 +22,23 @@ class RawTerm {
 public:
     RawTerm() {enableRawMode();}
     ~RawTerm() {disableRawMode();}
+
+    void putBlock(t_point const &p) const {
+        std::cout << "\e[999" << DOWN;
+        std::cout << "\e[999" << LEFT;
+        if (p.y) std::cout << "\e[" << 24 - p.y - 1 << UP;
+        if (p.x) std::cout << "\e[" << p.x << RIGHT;
+        std::cout << 'X' << std::flush;
+    }
+
 private:
     struct termios _orig_termios;
+
     void disableRawMode() {
         if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &_orig_termios) == -1)
             throw std::runtime_error("tcsetattr");
     }
+
     void enableRawMode() {
         if (tcgetattr(STDIN_FILENO, &_orig_termios) == -1)
             throw std::runtime_error("tcsetattr");
