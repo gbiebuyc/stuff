@@ -59,6 +59,10 @@ private:
                 else if (c == RIGHT) _snake.setDirection(RIGHT);
                 else if (c == LEFT) _snake.setDirection(LEFT);
             }
+            else if (c == 'h') _snake.setDirection(LEFT);
+            else if (c == 'j') _snake.setDirection(DOWN);
+            else if (c == 'k') _snake.setDirection(UP);
+            else if (c == 'l') _snake.setDirection(RIGHT);
         }
     }
 
