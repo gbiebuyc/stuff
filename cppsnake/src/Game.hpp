@@ -19,6 +19,7 @@
 #define LEFT 'D'
 
 #include <iostream>
+#include <algorithm>
 #include <list>
 #include <unistd.h>
 #include "Cell.hpp"
@@ -29,7 +30,7 @@
 class Game {
 
 public:
-    void Loop() {
+    void loop() {
         while (true) {
             draw();
             usleep(150000);

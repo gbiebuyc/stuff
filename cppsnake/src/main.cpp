@@ -17,7 +17,7 @@
 int main() {
     try {
         Game game;
-        game.Loop();
+        game.loop();
     }
     catch (std::exception &e) {
         std::cerr << "Snake: Exception: " << e.what() << std::endl;
