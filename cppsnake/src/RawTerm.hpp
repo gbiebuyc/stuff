@@ -24,6 +24,7 @@ public:
         enableRawMode();
         for (int i = 0; i < 24; i++) std::cout << "\r\n";
     }
+
     ~RawTerm() {disableRawMode();}
 
     void putBlock(t_point const &p) const {
