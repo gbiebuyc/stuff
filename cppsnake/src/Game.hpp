@@ -58,8 +58,14 @@ private:
 
     void draw() const {
         _term.clear();
+        for (int i = 0; i < 79; i++) std::cout << '#';
+        for (int i = 0; i < 23; i++) std::cout << "#\e[1B\e[1D";
+        for (int i = 0; i < 79; i++) std::cout << "#\e[1D\e[1D";
+        for (int i = 0; i < 23; i++) std::cout << "#\e[1A\e[1D";
         for (auto const &elem : _snake.getCells()) {
+            std::cout << "\e[32m";
             _term.putBlock(elem);
+            std::cout << "\e[m";
         }
         _term.moveCursorBottomLeft();
     }

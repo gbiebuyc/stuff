@@ -35,13 +35,17 @@ public:
     }
 
     void moveCursorBottomLeft() const {
-        std::cout << "\e[999" << DOWN;
-        std::cout << "\e[999" << LEFT;
-        std::cout << std::flush;
+        std::cout << "\e[999" << DOWN << "\e[999" << LEFT << std::flush;
+    }
+
+    void moveCursorTopLeft() const {
+        moveCursorBottomLeft();
+        std::cout << "\e[23" << UP << std::flush;
     }
 
     void clear() const {
-        std::cout << "\e[23" << UP << "\e[J";
+        moveCursorTopLeft();
+        std::cout << "\e[J" << std::flush;
     }
 
 private:

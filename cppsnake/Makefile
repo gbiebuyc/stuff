@@ -12,7 +12,7 @@
 
 .PHONY: clean re
 
-CXXFLAGS = -Wall -Wextra
+CXXFLAGS = -Wall -Wextra -std=c++14
 
 snake: src/*
 	g++ $(CXXFLAGS) -o $@ src/main.cpp
