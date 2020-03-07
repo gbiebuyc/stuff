@@ -29,11 +29,8 @@ class Game {
 
 public:
     void Loop() {
-        for (int i = 0; i < 24; i++) std::cout << "\r\n";
         while (true) {
-            std::cout << "\e[23" << UP << "\e[J";
             draw();
-            _term.moveCursorBottomLeft();
             usleep(500000);
             readInput();
             _snake.advanceSnake();
@@ -60,9 +57,11 @@ private:
     }
 
     void draw() const {
+        _term.clear();
         for (auto const &elem : _snake.getCells()) {
             _term.putBlock(elem);
         }
+        _term.moveCursorBottomLeft();
     }
 };
 

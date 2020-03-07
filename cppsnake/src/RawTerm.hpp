@@ -20,7 +20,10 @@
 
 class RawTerm {
 public:
-    RawTerm() {enableRawMode();}
+    RawTerm() {
+        enableRawMode();
+        for (int i = 0; i < 24; i++) std::cout << "\r\n";
+    }
     ~RawTerm() {disableRawMode();}
 
     void putBlock(t_point const &p) const {
@@ -34,6 +37,10 @@ public:
         std::cout << "\e[999" << DOWN;
         std::cout << "\e[999" << LEFT;
         std::cout << std::flush;
+    }
+
+    void clear() const {
+        std::cout << "\e[23" << UP << "\e[J";
     }
 
 private:
