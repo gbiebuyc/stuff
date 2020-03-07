@@ -33,9 +33,8 @@ public:
         while (true) {
             draw();
             usleep(150000);
-            readInput();
-            if (_snake.advanceSnake() == false)
-                break;
+            if (!readInput()) break;
+            if (!_snake.advanceSnake()) break;
             _snake.checkFood(_food);
         }
     }
@@ -47,11 +46,11 @@ private:
     Snake _snake;
     Food _food;
 
-    void readInput() {
+    bool readInput() {
         char c;
         while (read(STDIN_FILENO, &c, 1) == 1){
             if (c == '\e') {
-                if (read(STDIN_FILENO, &c, 1) != 1) continue;
+                if (read(STDIN_FILENO, &c, 1) != 1) return false;
                 if (c != '[') continue;
                 if (read(STDIN_FILENO, &c, 1) != 1) continue;
                 if (c == UP) _snake.setDirection(UP);
@@ -64,6 +63,7 @@ private:
             else if (c == 'k') _snake.setDirection(UP);
             else if (c == 'l') _snake.setDirection(RIGHT);
         }
+        return true;
     }
 
     void draw() const {
