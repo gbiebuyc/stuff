@@ -21,17 +21,27 @@ public:
         _cells.push_back({10, 10});
     }
 
-    void advanceSnake() {
-        t_point newHead = _cells.back();
+    bool advanceSnake() {
+        Cell newHead = _cells.back();
         if (_direction == UP) newHead.y--;
         else if (_direction == DOWN) newHead.y++;
         else if (_direction == LEFT) newHead.x--;
         else if (_direction == RIGHT) newHead.x++;
+        if (newHead.x < 1 || newHead.x > 78 ||
+                newHead.y < 1 || newHead.y > 22)
+            return false;
         _cells.push_back(newHead);
         _cells.pop_front();
+        return true;
     }
 
-    std::list<t_point> const &getCells() const {
+    void checkCollisions() {
+        Cell head = _cells.back();
+    }
+
+    //void checkFood(std::list<Cell> food)
+
+    std::list<Cell> const &getCells() const {
         return _cells;
     }
 
@@ -40,7 +50,7 @@ public:
     }
 
 private:
-    std::list<t_point> _cells;
+    std::list<Cell> _cells;
     char _direction = RIGHT;
 
 };

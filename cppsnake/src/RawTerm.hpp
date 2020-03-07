@@ -27,7 +27,7 @@ public:
 
     ~RawTerm() {disableRawMode();}
 
-    void putBlock(t_point const &p) const {
+    void putBlock(Cell const &p) const {
         moveCursorBottomLeft();
         if (p.y) std::cout << "\e[" << 24 - p.y - 1 << UP;
         if (p.x) std::cout << "\e[" << p.x << RIGHT;
@@ -54,6 +54,7 @@ private:
     void disableRawMode() {
         if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &_orig_termios) == -1)
             throw std::runtime_error("tcsetattr");
+        std::cout << std::endl;
     }
 
     void enableRawMode() {

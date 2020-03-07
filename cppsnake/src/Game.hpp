@@ -17,12 +17,13 @@
 #define DOWN 'B'
 #define RIGHT 'C'
 #define LEFT 'D'
-typedef struct { int x, y; } t_point;
 
 #include <iostream>
 #include <list>
 #include <unistd.h>
+#include "Cell.hpp"
 #include "RawTerm.hpp"
+#include "Food.hpp"
 #include "Snake.hpp"
 
 class Game {
@@ -31,15 +32,19 @@ public:
     void Loop() {
         while (true) {
             draw();
-            usleep(500000);
+            usleep(150000);
             readInput();
-            _snake.advanceSnake();
+            if (_snake.advanceSnake() == false)
+                break;
         }
     }
+
+    ~Game() { std::cout << "\nGame Over\n"; }
 
 private:
     RawTerm _term;
     Snake _snake;
+    Food _food;
 
     void readInput() {
         char c;
@@ -62,11 +67,15 @@ private:
         for (int i = 0; i < 23; i++) std::cout << "#\e[1B\e[1D";
         for (int i = 0; i < 79; i++) std::cout << "#\e[1D\e[1D";
         for (int i = 0; i < 23; i++) std::cout << "#\e[1A\e[1D";
+        std::cout << "\e[32m";
         for (auto const &elem : _snake.getCells()) {
-            std::cout << "\e[32m";
             _term.putBlock(elem);
-            std::cout << "\e[m";
         }
+        std::cout << "\e[91m";
+        for (auto const &elem : _food.getCells()) {
+            _term.putBlock(elem);
+        }
+        std::cout << "\e[m";
         _term.moveCursorBottomLeft();
     }
 };
