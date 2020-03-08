@@ -18,11 +18,13 @@
 class Snake {
 public:
     Snake() {
-        _cells.push_back({10, 10});
+        _cells.push_front({10, 10});
+        _cells.push_front({11, 10});
+        _cells.push_front({12, 10});
     }
 
     bool advanceSnake() {
-        Cell newHead = _cells.back();
+        Cell newHead = _cells.front();
         if (_direction == UP) newHead.y--;
         else if (_direction == DOWN) newHead.y++;
         else if (_direction == LEFT) newHead.x--;
@@ -32,22 +34,22 @@ public:
             return false;
         if (std::find(_cells.begin(), _cells.end(), newHead) != _cells.end())
             return false;
-        _cells.push_back(newHead);
-        if (!_hasEaten)
-            _cells.pop_front();
-        _hasEaten = false;
+        _cells.push_front(newHead);
+        _cells.pop_back();
         return true;
     }
 
     void checkFood(Food &food) {
-        Cell &head = _cells.back();
+        Cell &head = _cells.front();
         auto &foods = food.getCells();
         auto it = std::find(foods.begin(), foods.end(), head);
         if (it == foods.end())
             return;
         food.eat(*it);
         food.spawnNewFood();
-        _hasEaten = true;
+        _cells.push_back(head);
+        _cells.push_back(head);
+        _cells.push_back(head);
     }
 
     std::list<Cell> const &getCells() const {
@@ -61,7 +63,6 @@ public:
 private:
     std::list<Cell> _cells;
     char _direction = RIGHT;
-    bool _hasEaten = false;
 
 };
 
