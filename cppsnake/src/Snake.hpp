@@ -47,9 +47,10 @@ public:
             return;
         food.eat(*it);
         food.spawnNewFood();
-        _cells.push_back(head);
-        _cells.push_back(head);
-        _cells.push_back(head);
+        Cell &tail = _cells.back();
+        _cells.push_back(tail);
+        _cells.push_back(tail);
+        _cells.push_back(tail);
     }
 
     std::list<Cell> const &getCells() const {
