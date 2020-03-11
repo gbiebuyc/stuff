@@ -30,8 +30,8 @@ def solve():
     a += b"\x00"
     a += ASN
     a += bytes.fromhex(VALID_H)
-    m = a + i.to_bytes(SIGNATURE_SIZE - len(a), byteorder='big')
-    x = int.from_bytes(m, 'big')
+    a += b'\x00' * (SIGNATURE_SIZE - len(a))
+    x = int.from_bytes(a, 'big')
     y = find_invpow(x, 3) + 1
     y = y.to_bytes(SIGNATURE_SIZE, byteorder='big')
     y = b64encode(y)
