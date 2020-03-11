@@ -33,7 +33,7 @@ def solve():
     m = a + i.to_bytes(SIGNATURE_SIZE - len(a), byteorder='big')
     x = int.from_bytes(m, 'big')
     y = find_invpow(x, 3) + 1
-    y = y.to_bytes(256, byteorder='big')
+    y = y.to_bytes(SIGNATURE_SIZE, byteorder='big')
     y = b64encode(y)
     print(y)
 
