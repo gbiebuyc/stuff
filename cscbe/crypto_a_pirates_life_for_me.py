@@ -6,6 +6,7 @@ SIGNATURE_SIZE = 256
 ASN = b"0!0\t\x06\x05+\x0e\x03\x02\x1a\x05\x00\x04\x14"
 
 
+# https://stackoverflow.com/questions/356090/how-to-compute-the-nth-root-of-a-very-big-integer
 def find_invpow(x,n):
     """Finds the integer component of the n'th root of x,
     an integer such that y ** n <= x < (y + 1) ** n.
