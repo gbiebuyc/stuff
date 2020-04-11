@@ -2,12 +2,7 @@
 import base64
 
 def hamming_distance(s1, s2):
-    result = 0
-    for n, m in zip(s1, s2):
-        for shift in range(8):
-            if ((n >> shift) & 1) != ((m >> shift) & 1):
-                result += 1
-    return result
+    return sum(bin(x ^ y).count('1') for x, y in zip(s1, s2))
 
 def solveSingleCharXOR(buf):
     bestResult = None
