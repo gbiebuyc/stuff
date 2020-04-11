@@ -33,10 +33,7 @@ def find_key(data, keysize):
     return key
 
 def solveRepeatingKeyXOR(data, key):
-    result = bytearray(len(data))
-    for i in range(len(data)):
-        result[i] = data[i] ^ key[i % len(key)]
-    return result
+    return bytes(x ^ key[i % len(key)] for i, x in enumerate(data))
 
 data = base64.b64decode(open('6.txt', 'r').read())
 keysizes = []
