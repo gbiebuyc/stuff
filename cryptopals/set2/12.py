@@ -58,24 +58,26 @@ def detectECB(inp, blocksize):
     return len(blocks) != len(set(blocks))
 
 key = randomBytes(16)
-for blocksize in range(2, 100):
-    if detectECB(encryption_oracle(b'a'*blocksize*2), blocksize):
+for bs in range(2, 100):
+    if detectECB(encryption_oracle(b'a'*bs*2), bs):
         break
-print('block size detected:', blocksize)
+print('block size detected:', bs)
 
 def makeDictionary(inp):
     myDict = {}
-    for i in range(32, 127):
+    for i in range(0, 128):
         block = inp + bytes([i])
-        encryptedBlock = encryption_oracle(block)[skip:skip+blocksize]
+        encryptedBlock = encryption_oracle(block)[skip:skip+bs]
         myDict[encryptedBlock] = bytes([i])
     return myDict
 
 plain = bytearray()
-for i in range(150):
-    skip = (i//blocksize)*blocksize
-    myDict = makeDictionary((b'a'*(15-i%blocksize) + plain))
-    # print(myDict)
-    ciphertext = encryption_oracle(b'a'*(15-i%blocksize))
-    plain += myDict[ciphertext[skip:skip+blocksize]]
-    print(plain)
+for i in range(999):
+    skip = (i//bs)*bs
+    myDict = makeDictionary((b'a'*(bs-1-i%bs) + plain))
+    ciphertext = encryption_oracle(b'a'*(bs-1-i%bs))
+    block = ciphertext[skip:skip+bs]
+    if not block in myDict:
+        break
+    plain += myDict[block]
+print(plain.decode())
