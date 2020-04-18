@@ -54,25 +54,25 @@ def decryptECB(key, inp):
 def randomBytes(n):
     return bytes(random.randint(0, 255) for i in range(n))
 
-def profile_for(email):
-    if type(email) == str:
-        email = email.encode()
-    if b'&' in email or b'=' in email:
-        raise ValueError('invalid characters in email')
-    profile = b'email=' + email + b'&uid=10&role=user'
-    return encryptECB(key, profile)
+def the_oracle(userdata):
+    if type(userdata) == str:
+        userdata = userdata.encode()
+    if b';' in userdata or b'=' in userdata:
+        raise ValueError('invalid characters in userdata')
+    profile = b"comment1=cooking%20MCs;userdata=" + userdata + b";comment2=%20like%20a%20pound%20of%20bacon"
+    return encryptCBC(key, iv, profile)
 
-def dec_profile(profile):
-    out = {}
-    profile = decryptECB(key, profile).decode()
-    for entry in profile.split('&'):
-        k, v = entry.split('=')
-        out[k] = v
-    return out
+def decrypt_and_check_admin(ct):
+    pt = decryptCBC(key, iv, ct)
+    print('decrypted:', pt)
+    if b';admin=true;' in pt:
+        print('SUCCESS')
+    else:
+        print('FAIL')
 
 key = randomBytes(16)
-email_len = 16 - len('email=&uid=10&role=') % 16
-ciphertext1 = profile_for(email_len*'a')
-ciphertext2 = profile_for((16-len('email='))*b'a' + b'admin' + b'\x0b'*0xb)
-payload = ciphertext1[:-16] + ciphertext2[16:32]
-print(dec_profile(payload))
+iv = randomBytes(16)
+pad = b'x'*16
+ct = the_oracle(pad + pad)
+ct[32:48] = xor(ct[32:48], xor(pad, b';admin=true;xxxx'))
+decrypt_and_check_admin(ct)
