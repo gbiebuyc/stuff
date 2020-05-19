@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 using namespace std;
 typedef long long ll;
@@ -44,8 +45,8 @@ pair<int, int> parse() {
 
 int main() {
     int t, tc;
-    cin >> tc;
-    cin.ignore();
+    getline(cin, line);
+    stringstream(line) >> tc;
     for (t=0; t<tc; t++) {
         getline(cin, line);
         i = 0;
