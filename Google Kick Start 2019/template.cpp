@@ -8,7 +8,7 @@ using namespace std;
 typedef long long ll;
 
 int main() {
-    int t, N;
+    ll t, N;
     cin>>t;
     for (int i=1; i<=t; i++) {
         cin>>N;
