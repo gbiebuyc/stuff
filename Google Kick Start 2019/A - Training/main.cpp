@@ -17,7 +17,6 @@ int main() {
             cin>>v[i];
         sort(v.begin(), v.end());
         vector<ll> prefixSum(N);
-        ll sum = 0;
         prefixSum[0] = v[0];
         for (int i=1; i<N; i++)
             prefixSum[i] = prefixSum[i-1]+v[i];
