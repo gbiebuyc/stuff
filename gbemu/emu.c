@@ -44,8 +44,9 @@ int main() {
 	while (true) {
 		unsigned char opcode = mem[PC++];
 		if (opcode==0x31)      { memcpy(&SP, mem+PC, sizeof(SP)); PC += 2; }
-		else if (opcode==0xaf) { AF &= 0xff00;                    PC += 1; }
+		else if (opcode==0xaf) { AF &= 0x00ff;                    PC += 1; }
 		else if (opcode==0x21) { memcpy(&HL, mem+PC, sizeof(HL)); PC += 2; }
+		else if (opcode==0x32) { mem[HL--] = AF>>8;               PC += 1; }
 
 	}
 }
