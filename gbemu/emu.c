@@ -77,8 +77,8 @@ int main() {
 			if (!(FLAGS & 0x80))
 				PC += offset;
 		}
-		else if (opcode < 0x40 && (opcode%8==6)) {
-			*get_reg(opcode/8) = mem[PC++];
+		else if (opcode < 0x40 && (opcode&0x7)==6) {
+			*get_reg(opcode>>3) = mem[PC++];
 		}
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
