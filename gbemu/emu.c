@@ -34,61 +34,56 @@ unsigned char bootrom[] = {
   0xf5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xfb, 0x86, 0x20, 0xfe,
   0x3e, 0x01, 0xe0, 0x50
 };
-uint16_t PC = 0;
-uint16_t SP;
-uint16_t AF, BC, DE, HL;
-#define FLAGS (*(unsigned char*)&AF)
-#define B 0
-#define C 1
-#define D 2
-#define E 3
-#define H 4
-#define L 5
-#define A 7
+uint16_t PC, SP;
+union {
+	struct { uint16_t AF, BC, DE, HL; };
+	struct { uint8_t F, A, C, B, E, D, L, H; };
+} regs;
 
 unsigned char *get_reg(int i) {
 	i &= 0x7;
-	if (i==0) return ((unsigned char*)&BC)+1;
-	if (i==1) return ((unsigned char*)&BC);
-	if (i==2) return ((unsigned char*)&DE)+1;
-	if (i==3) return ((unsigned char*)&DE);
-	if (i==4) return ((unsigned char*)&HL)+1;
-	if (i==5) return ((unsigned char*)&HL);
-	if (i==6) return mem + HL;
-	if (i==7) return ((unsigned char*)&AF)+1;
+	if (i==0) return &regs.B;
+	if (i==1) return &regs.C;
+	if (i==2) return &regs.D;
+	if (i==3) return &regs.E;
+	if (i==4) return &regs.H;
+	if (i==5) return &regs.L;
+	if (i==6) return mem + regs.HL;
+	if (i==7) return &regs.A;
 }
 
 
 int main() {
 	memcpy(mem, bootrom, sizeof(bootrom));
 	while (true) {
-		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x\n", AF, BC, DE, HL, SP, PC);
+		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x\n",
+				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC);
 		fflush(stdout);
 		unsigned char opcode = mem[PC++];
-		if (opcode==0x31)      { memcpy(&SP, mem+PC, sizeof(SP)); PC += 2; }
-		else if (opcode==0xaf) { AF &= 0x00ff;                             }
-		else if (opcode==0x21) { memcpy(&HL, mem+PC, sizeof(HL)); PC += 2; }
-		else if (opcode==0x32) { mem[HL--] = AF>>8;                        }
+		if (opcode==0x31)      { SP = *(uint16_t*)(mem+PC);      PC += 2; }
+		else if (opcode==0xaf) { regs.A = 0;                              }
+		else if (opcode==0x21) { regs.HL = *(uint16_t*)(mem+PC); PC += 2; }
+		else if (opcode==0x32) { mem[regs.HL--] = regs.A;                 }
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
 			unsigned char hi_nibble = opcode >> 4;
 			unsigned char lo_nibble = opcode & 0xf;
 			if (hi_nibble >= 0x4 && hi_nibble < 0x8) {
 				unsigned char bit = ((hi_nibble-4)<<1) + (lo_nibble>>3);
-				FLAGS = (*get_reg(lo_nibble) & (1 << bit)) ? 0 : 0x80;
+				regs.F = (*get_reg(lo_nibble) & (1 << bit)) ? 0 : 0x80;
 			}
 
 		}
 		else if (opcode==0x20) {
 			int offset = ((char*)mem)[PC++];
-			if (!(FLAGS & 0x80))
+			if (!(regs.F & 0x80))
 				PC += offset;
 		}
 		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_reg(opcode>>3) -= 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_reg(opcode>>3) += 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_reg(opcode>>3) = mem[PC++]; }
-		else if (opcode==0xe2) { mem[0xff00+(BC&0xf)] = *get_reg(A); }
-		else if (opcode==0xf2) { *get_reg(A) = mem[0xff00+(BC&0xf)]; }
+		else if (opcode==0xe2) { mem[0xff00+(regs.BC&0xf)] = regs.A; }
+		else if (opcode==0xf2) { regs.A = mem[0xff00+(regs.BC&0xf)]; }
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
