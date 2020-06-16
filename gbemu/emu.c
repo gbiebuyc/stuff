@@ -67,7 +67,7 @@ int main() {
 			unsigned char hi_nibble = opcode >> 4;
 			unsigned char lo_nibble = opcode & 0xf;
 			if (hi_nibble >= 0x4 && hi_nibble < 0x8) {
-				unsigned char bit = (hi_nibble-4)<<1 + lo_nibble>>3;
+				unsigned char bit = ((hi_nibble-4)<<1) + (lo_nibble>>3);
 				FLAGS = (*get_reg(lo_nibble) & (1 << bit)) ? 0 : 0x80;
 			}
 
