@@ -72,6 +72,11 @@ int main() {
 			}
 
 		}
+		else if (opcode==0x20) {
+			int offset = ((char*)mem)[PC++];
+			if (!(FLAGS & 0x80))
+				PC += offset;
+		}
 		else {
 			printf("Unknown opcode: %x\n", opcode);
 			exit(EXIT_FAILURE);
