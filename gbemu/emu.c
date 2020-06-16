@@ -9,8 +9,8 @@
 #include <string.h>
 #include <stdint.h>
 
-unsigned char mem[0xffff];
-unsigned char bootrom[] = {
+uint8_t mem[0xffff];
+uint8_t bootrom[] = {
   0x31, 0xfe, 0xff, 0xaf, 0x21, 0xff, 0x9f, 0x32, 0xcb, 0x7c, 0x20, 0xfb,
   0x21, 0x26, 0xff, 0x0e, 0x11, 0x3e, 0x80, 0x32, 0xe2, 0x0c, 0x3e, 0xf3,
   0xe2, 0x32, 0x3e, 0x77, 0x77, 0x3e, 0xfc, 0xe0, 0x47, 0x11, 0x04, 0x01,
@@ -40,7 +40,7 @@ union {
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
 
-unsigned char *get_reg(int i) {
+uint8_t *get_reg(int i) {
 	i &= 0x7;
 	if (i==0) return &regs.B;
 	if (i==1) return &regs.C;
@@ -59,7 +59,7 @@ int main() {
 		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x\n",
 				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC);
 		fflush(stdout);
-		unsigned char opcode = mem[PC++];
+		uint8_t opcode = mem[PC++];
 		if (opcode==0x31)      { SP = *(uint16_t*)(mem+PC);      PC += 2; }
 		else if (opcode==0xaf) { regs.A = 0;                              }
 		else if (opcode==0x21) { regs.HL = *(uint16_t*)(mem+PC); PC += 2; }
@@ -67,13 +67,13 @@ int main() {
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
 			if (opcode >= 0x40 && opcode < 0x80) {
-				unsigned char bit = (opcode-0x40)>>3;
+				int bit = (opcode-0x40)>>3;
 				regs.F = (*get_reg(opcode) & (1 << bit)) ? 0 : 0x80;
 			}
 
 		}
 		else if (opcode==0x20) {
-			int offset = ((char*)mem)[PC++];
+			int offset = ((int8_t*)mem)[PC++];
 			if (!(regs.F & 0x80))
 				PC += offset;
 		}
