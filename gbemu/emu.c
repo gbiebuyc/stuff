@@ -38,6 +38,13 @@ uint16_t PC = 0;
 uint16_t SP;
 uint16_t AF, BC, DE, HL;
 #define FLAGS (*(unsigned char*)&AF)
+#define B 0
+#define C 1
+#define D 2
+#define E 3
+#define H 4
+#define L 5
+#define A 7
 
 unsigned char *get_reg(int i) {
 	i &= 0x7;
@@ -77,9 +84,11 @@ int main() {
 			if (!(FLAGS & 0x80))
 				PC += offset;
 		}
-		else if (opcode < 0x40 && (opcode&0x7)==6) {
-			*get_reg(opcode>>3) = mem[PC++];
-		}
+		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_reg(opcode>>3) -= 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_reg(opcode>>3) += 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_reg(opcode>>3) = mem[PC++]; }
+		else if (opcode==0xe2) { mem[0xff00+(BC&0xf)] = *get_reg(A); }
+		else if (opcode==0xf2) { *get_reg(A) = mem[0xff00+(BC&0xf)]; }
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
