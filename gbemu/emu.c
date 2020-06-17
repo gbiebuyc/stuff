@@ -70,8 +70,8 @@ int main() {
 		else if (opcode==0x11) { regs.DE = read16(); }
 		else if (opcode==0x21) { regs.HL = read16(); }
 		else if (opcode==0x31) { SP = read16(); }
-		else if (opcode==0xaf) { regs.A = 0;                              }
-		else if (opcode==0x32) { mem[regs.HL--] = regs.A;                 }
+		else if (opcode==0xaf) { regs.A = 0; }
+		else if (opcode==0x32) { mem[regs.HL--] = regs.A; }
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
 			if (opcode >= 0x40 && opcode < 0x80) {
@@ -93,6 +93,14 @@ int main() {
 		else if (opcode==0xf0) { regs.A = mem[0xff00+mem[PC++]]; }
 		else if (opcode==0xe2) { mem[0xff00+regs.C] = regs.A; }
 		else if (opcode==0xf2) { regs.A = mem[0xff00+regs.C]; }
+		else if (opcode==0x02) { mem[regs.BC] = regs.A; }
+		else if (opcode==0x12) { mem[regs.DE] = regs.A; }
+		else if (opcode==0x22) { mem[regs.HL++] = regs.A; }
+		else if (opcode==0x32) { mem[regs.HL--] = regs.A; }
+		else if (opcode==0x0a) { regs.A = mem[regs.BC]; }
+		else if (opcode==0x1a) { regs.A = mem[regs.DE]; }
+		else if (opcode==0x2a) { regs.A = mem[regs.HL++]; }
+		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
