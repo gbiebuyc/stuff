@@ -52,6 +52,12 @@ uint8_t *get_reg(int i) {
 	if (i==7) return &regs.A;
 }
 
+uint16_t read16() {
+	uint16_t val = *(uint16_t*)(mem+PC);
+	PC+=2;
+	return val;
+}
+
 
 int main() {
 	memcpy(mem, bootrom, sizeof(bootrom));
@@ -60,9 +66,11 @@ int main() {
 				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC);
 		fflush(stdout);
 		uint8_t opcode = mem[PC++];
-		if (opcode==0x31)      { SP = *(uint16_t*)(mem+PC);      PC += 2; }
+		if (opcode==0x01)      { regs.BC = read16(); }
+		else if (opcode==0x11) { regs.DE = read16(); }
+		else if (opcode==0x21) { regs.HL = read16(); }
+		else if (opcode==0x31) { SP = read16(); }
 		else if (opcode==0xaf) { regs.A = 0;                              }
-		else if (opcode==0x21) { regs.HL = *(uint16_t*)(mem+PC); PC += 2; }
 		else if (opcode==0x32) { mem[regs.HL--] = regs.A;                 }
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
