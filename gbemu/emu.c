@@ -84,6 +84,14 @@ int main() {
 		else if (opcode==0x11) { regs.DE = read16(); }
 		else if (opcode==0x21) { regs.HL = read16(); }
 		else if (opcode==0x31) { SP = read16(); }
+		else if (opcode==0x03) { regs.BC++; } // INC
+		else if (opcode==0x13) { regs.DE++; }
+		else if (opcode==0x23) { regs.HL++; }
+		else if (opcode==0x33) { SP++; }
+		else if (opcode==0x0b) { regs.BC--; } // DEC
+		else if (opcode==0x1b) { regs.DE--; }
+		else if (opcode==0x2b) { regs.HL--; }
+		else if (opcode==0x3b) { SP--; }
 		else if (opcode==0xaf) { regs.A = 0; }
 		else if (opcode==0x32) { mem[regs.HL--] = regs.A; }
 		else if (opcode==0x07) { rotate(ROT_LEFT,  &regs.A, false); }
@@ -125,12 +133,13 @@ int main() {
 		else if (opcode==0x1a) { regs.A = mem[regs.DE]; }
 		else if (opcode==0x2a) { regs.A = mem[regs.HL++]; }
 		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
-		else if (opcode==0xcd) { SP-=2; mem[SP]=PC; PC=read16(); }
-		else if (opcode==0xc5) { SP-=2; mem[SP]=regs.BC; }
+		else if (opcode==0xcd) { SP-=2; mem[SP]=PC+2; PC=read16(); } // CALL
+		else if (opcode==0xc9) { PC=mem[SP]; SP+=2; } // RET
+		else if (opcode==0xc5) { SP-=2; mem[SP]=regs.BC; } // PUSH
 		else if (opcode==0xd5) { SP-=2; mem[SP]=regs.DE; }
 		else if (opcode==0xe5) { SP-=2; mem[SP]=regs.HL; }
 		else if (opcode==0xf5) { SP-=2; mem[SP]=regs.AF; }
-		else if (opcode==0xc1) { regs.BC=mem[SP]; SP+=2; }
+		else if (opcode==0xc1) { regs.BC=mem[SP]; SP+=2; } // POP
 		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
 		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
 		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
