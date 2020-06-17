@@ -81,6 +81,8 @@ int main() {
 		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_reg(opcode>>3) -= 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_reg(opcode>>3) = mem[PC++]; }
 		else if (opcode >= 0x40 && opcode < 0x80) { *get_reg((opcode-0x40)>>3) = *get_reg(opcode); }
+		else if (opcode==0xe0) { mem[0xff00+mem[PC++]] = regs.A; }
+		else if (opcode==0xf0) { regs.A = mem[0xff00+mem[PC++]]; }
 		else if (opcode==0xe2) { mem[0xff00+regs.C] = regs.A; }
 		else if (opcode==0xf2) { regs.A = mem[0xff00+regs.C]; }
 		else {
