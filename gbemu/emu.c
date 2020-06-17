@@ -39,8 +39,10 @@ union {
 	struct { uint16_t AF, BC, DE, HL; };
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
+#define ROT_LEFT 0
+#define ROT_RIGHT 1
 
-uint8_t *get_reg(int i) {
+uint8_t *get_param(int i) {
 	i &= 0x7;
 	if (i==0) return &regs.B;
 	if (i==1) return &regs.C;
@@ -58,12 +60,24 @@ uint16_t read16() {
 	return val;
 }
 
+void rotate(int dir, uint8_t *param, bool through_carry) {
+	int shifted_out = (dir==ROT_LEFT) ? *param>>7 : *param&1;
+	int shifted_in = through_carry ? regs.F>>4&1 : shifted_out;
+	*param = (dir==ROT_LEFT) ? *param<<1|shifted_in : *param>>1|shifted_in<<7;
+	regs.F = ((*param==0) ? 0x80 : 0) | (shifted_out<<4);
+}
+
 
 int main() {
 	memcpy(mem, bootrom, sizeof(bootrom));
 	while (true) {
-		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x\n",
-				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC);
+		char flag_str[] = "----";
+		flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
+		flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
+		flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
+		flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
+		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %s Opcode=%-2x\n",
+				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
 		fflush(stdout);
 		uint8_t opcode = mem[PC++];
 		if (opcode==0x01)      { regs.BC = read16(); }
@@ -72,11 +86,21 @@ int main() {
 		else if (opcode==0x31) { SP = read16(); }
 		else if (opcode==0xaf) { regs.A = 0; }
 		else if (opcode==0x32) { mem[regs.HL--] = regs.A; }
+		else if (opcode==0x07) { rotate(ROT_LEFT,  &regs.A, false); }
+		else if (opcode==0x0f) { rotate(ROT_RIGHT, &regs.A, false); }
+		else if (opcode==0x17) { rotate(ROT_LEFT,  &regs.A, true); }
+		else if (opcode==0x1f) { rotate(ROT_RIGHT, &regs.A, true); }
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
+			uint8_t *param = get_param(opcode);
 			if (opcode >= 0x40 && opcode < 0x80) {
 				int bit = (opcode-0x40)>>3;
-				regs.F = (*get_reg(opcode) & (1 << bit)) ? 0 : 0x80;
+				regs.F = (*param & (1 << bit)) ? 0 : 0x80;
+			}
+			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  param, true); }
+			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, param, true); }
+			else {
+				exit(printf("Unknown opcode: 0xcb %#x\n", opcode));
 			}
 
 		}
@@ -85,10 +109,10 @@ int main() {
 			if (!(regs.F & 0x80))
 				PC += offset;
 		}
-		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_reg(opcode>>3) += 1; }
-		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_reg(opcode>>3) -= 1; }
-		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_reg(opcode>>3) = mem[PC++]; }
-		else if (opcode >= 0x40 && opcode < 0x80) { *get_reg((opcode-0x40)>>3) = *get_reg(opcode); }
+		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_param(opcode>>3) += 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_param(opcode>>3) -= 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_param(opcode>>3) = mem[PC++]; }
+		else if (opcode >= 0x40 && opcode < 0x80) { *get_param((opcode-0x40)>>3) = *get_param(opcode); }
 		else if (opcode==0xe0) { mem[0xff00+mem[PC++]] = regs.A; }
 		else if (opcode==0xf0) { regs.A = mem[0xff00+mem[PC++]]; }
 		else if (opcode==0xe2) { mem[0xff00+regs.C] = regs.A; }
@@ -101,6 +125,15 @@ int main() {
 		else if (opcode==0x1a) { regs.A = mem[regs.DE]; }
 		else if (opcode==0x2a) { regs.A = mem[regs.HL++]; }
 		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
+		else if (opcode==0xcd) { SP-=2; mem[SP]=PC; PC=read16(); }
+		else if (opcode==0xc5) { SP-=2; mem[SP]=regs.BC; }
+		else if (opcode==0xd5) { SP-=2; mem[SP]=regs.DE; }
+		else if (opcode==0xe5) { SP-=2; mem[SP]=regs.HL; }
+		else if (opcode==0xf5) { SP-=2; mem[SP]=regs.AF; }
+		else if (opcode==0xc1) { regs.BC=mem[SP]; SP+=2; }
+		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
+		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
+		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
