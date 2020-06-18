@@ -177,6 +177,8 @@ int main() {
 		else if (opcode==0xd6) { subtract(mem[PC++]); }
 		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_param(opcode)); } // CP
 		else if (opcode==0xfe) { compare(mem[PC++]); }
+		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
+		else if (opcode==0xfa) { regs.A = mem[read16()]; }
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
