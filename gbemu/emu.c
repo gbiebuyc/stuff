@@ -9,6 +9,13 @@
 #include <string.h>
 #include <stdint.h>
 
+#define ROT_LEFT 0
+#define ROT_RIGHT 1
+#define FLAG_Z (regs.F>>7&1)
+#define FLAG_N (regs.F>>6&1)
+#define FLAG_H (regs.F>>5&1)
+#define FLAG_C (regs.F>>4&1)
+
 uint8_t mem[0xffff];
 uint8_t bootrom[] = {
   0x31, 0xfe, 0xff, 0xaf, 0x21, 0xff, 0x9f, 0x32, 0xcb, 0x7c, 0x20, 0xfb,
@@ -39,8 +46,6 @@ union {
 	struct { uint16_t AF, BC, DE, HL; };
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
-#define ROT_LEFT 0
-#define ROT_RIGHT 1
 
 uint8_t *get_param(int i) {
 	i &= 0x7;
@@ -69,7 +74,7 @@ void set_flags(char Z, char N, char H, char C) {
 
 void rotate(int dir, uint8_t *param, bool through_carry) {
 	int shifted_out = (dir==ROT_LEFT) ? *param>>7 : *param&1;
-	int shifted_in = through_carry ? regs.F>>4&1 : shifted_out;
+	int shifted_in = through_carry ? FLAG_C : shifted_out;
 	*param = (dir==ROT_LEFT) ? *param<<1|shifted_in : *param>>1|shifted_in<<7;
 	set_flags(!*param, 0, 0, shifted_out);
 }
@@ -119,9 +124,9 @@ int main() {
 			}
 
 		}
-		else if (opcode==0x20) {
+		else if (opcode==0x20) { // JR NZ
 			int offset = ((int8_t*)mem)[PC++];
-			if (!(regs.F & 0x80))
+			if (!FLAG_Z)
 				PC += offset;
 		}
 		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_param(opcode>>3) += 1; }
