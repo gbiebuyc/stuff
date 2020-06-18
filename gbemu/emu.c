@@ -106,7 +106,7 @@ int main() {
 		flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
 		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %.4s Opcode=%-2x\n",
 				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
-		fflush(stdout);
+		//fflush(stdout);
 		uint8_t opcode = mem[PC++];
 		if (opcode==0x01)      { regs.BC = read16(); }
 		else if (opcode==0x11) { regs.DE = read16(); }
@@ -140,11 +140,11 @@ int main() {
 			}
 
 		}
-		else if (opcode==0x20) { // JR NZ
-			int offset = ((int8_t*)mem)[PC++];
-			if (!FLAG_Z)
-				PC += offset;
-		}
+		else if (opcode==0x18) { PC += (int8_t)mem[PC++]; } // JR
+		else if (opcode==0x20) { if (!FLAG_Z) PC += (int8_t)mem[PC]; PC++; } // JR NZ
+		else if (opcode==0x28) { if (FLAG_Z) PC += (int8_t)mem[PC]; PC++; } // JR Z
+		else if (opcode==0x30) { if (!FLAG_C) PC += (int8_t)mem[PC]; PC++; } // JR NC
+		else if (opcode==0x38) { if (FLAG_C) PC += (int8_t)mem[PC]; PC++; } // JR C
 		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_param(opcode>>3) += 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_param(opcode>>3) -= 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_param(opcode>>3) = mem[PC++]; }
