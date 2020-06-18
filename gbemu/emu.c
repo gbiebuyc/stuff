@@ -68,10 +68,12 @@ void rotate(int dir, uint8_t *param, bool through_carry) {
 }
 
 void set_flag(char flag, int val) {
-	if (flag=='Z') regs.F = (regs.F & 0x7f) | (val ? 0x80 : 0);
-	else if (flag=='N') regs.F = (regs.F & 0xbf) | (val ? 0x40 : 0);
-	else if (flag=='H') regs.F = (regs.F & 0xdf) | (val ? 0x20 : 0);
-	else if (flag=='C') regs.F = (regs.F & 0xef) | (val ? 0x10 : 0);
+	for (int i=0; i<4; i++) {
+		if (flag=="ZNHC"[i]) {
+			regs.F = val ? (regs.F|0x80>>i) : (regs.F&~(0x80>>i));
+			return;
+		}
+	}
 }
 
 
