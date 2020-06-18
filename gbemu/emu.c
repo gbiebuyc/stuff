@@ -67,16 +67,23 @@ void rotate(int dir, uint8_t *param, bool through_carry) {
 	regs.F = ((*param==0) ? 0x80 : 0) | (shifted_out<<4);
 }
 
+void set_flag(char flag, int val) {
+	if (flag=='Z') regs.F = (regs.F & 0x7f) | (val ? 0x80 : 0);
+	else if (flag=='N') regs.F = (regs.F & 0xbf) | (val ? 0x40 : 0);
+	else if (flag=='H') regs.F = (regs.F & 0xdf) | (val ? 0x20 : 0);
+	else if (flag=='C') regs.F = (regs.F & 0xef) | (val ? 0x10 : 0);
+}
+
 
 int main() {
 	memcpy(mem, bootrom, sizeof(bootrom));
 	while (true) {
-		char flag_str[] = "----";
+		char flag_str[4];
 		flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
 		flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
 		flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
 		flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
-		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %s Opcode=%-2x\n",
+		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %.4s Opcode=%-2x\n",
 				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
 		fflush(stdout);
 		uint8_t opcode = mem[PC++];
@@ -103,7 +110,9 @@ int main() {
 			uint8_t *param = get_param(opcode);
 			if (opcode >= 0x40 && opcode < 0x80) {
 				int bit = (opcode-0x40)>>3;
-				regs.F = (*param & (1 << bit)) ? 0 : 0x80;
+				set_flag('Z', !(*param & (1 << bit)));
+				set_flag('N', 0);
+				set_flag('H', 1);
 			}
 			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  param, true); }
 			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, param, true); }
@@ -143,6 +152,7 @@ int main() {
 		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
 		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
 		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
+		//else if (opcode >= 0xb8 && opcode < 0xc0) 
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
