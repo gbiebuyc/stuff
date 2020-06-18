@@ -155,6 +155,12 @@ int main() {
 		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
 		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
 		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
+		else if (opcode >= 0x80 && opcode < 0x88) { // ADD
+			int a = regs.A;
+			int b = *get_param(opcode);
+			set_flags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
+			regs.A += b;
+		}
 		//else if (opcode >= 0xb8 && opcode < 0xc0) 
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
