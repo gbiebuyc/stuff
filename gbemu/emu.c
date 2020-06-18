@@ -79,6 +79,22 @@ void rotate(int dir, uint8_t *param, bool through_carry) {
 	set_flags(!*param, 0, 0, shifted_out);
 }
 
+void add(int b) {
+	int a = regs.A;
+	set_flags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
+	regs.A += b;
+}
+
+void compare(int b) {
+	int a = regs.A;
+	set_flags(a==b, 1, ((a&0xf)-(b&0xf))<0, b>a);
+}
+
+void subtract(int b) {
+	compare(b);
+	regs.A -= b;
+}
+
 
 int main() {
 	memcpy(mem, bootrom, sizeof(bootrom));
@@ -155,19 +171,12 @@ int main() {
 		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
 		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
 		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
-		else if (opcode >= 0x80 && opcode < 0x88) { // ADD
-			int a = regs.A;
-			int b = *get_param(opcode);
-			set_flags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
-			regs.A += b;
-		}
-		else if (opcode >= 0x90 && opcode < 0x98) { // SUB
-			int a = regs.A;
-			int b = *get_param(opcode);
-			set_flags(a==b, 1, ((a&0xf)-(b&0xf))<0, b>a);
-			regs.A -= b;
-		}
-		//else if (opcode >= 0xb8 && opcode < 0xc0) 
+		else if (opcode >= 0x80 && opcode < 0x88) { add(*get_param(opcode)); } // ADD
+		else if (opcode==0xc6) { add(mem[PC++]); }
+		else if (opcode >= 0x90 && opcode < 0x98) { subtract(*get_param(opcode)); } // SUB
+		else if (opcode==0xd6) { subtract(mem[PC++]); }
+		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_param(opcode)); } // CP
+		else if (opcode==0xfe) { compare(mem[PC++]); }
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
