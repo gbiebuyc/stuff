@@ -161,6 +161,12 @@ int main() {
 			set_flags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
 			regs.A += b;
 		}
+		else if (opcode >= 0x90 && opcode < 0x98) { // SUB
+			int a = regs.A;
+			int b = *get_param(opcode);
+			set_flags(a==b, 1, ((a&0xf)-(b&0xf))<0, b>a);
+			regs.A -= b;
+		}
 		//else if (opcode >= 0xb8 && opcode < 0xc0) 
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
