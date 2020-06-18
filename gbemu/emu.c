@@ -60,20 +60,18 @@ uint16_t read16() {
 	return val;
 }
 
+void set_flags(char Z, char N, char H, char C) {
+	if (Z==1) regs.F |= 0x80; else if (Z==0) regs.F &= ~0x80;
+	if (N==1) regs.F |= 0x40; else if (N==0) regs.F &= ~0x40;
+	if (H==1) regs.F |= 0x20; else if (H==0) regs.F &= ~0x20;
+	if (C==1) regs.F |= 0x10; else if (C==0) regs.F &= ~0x10;
+}
+
 void rotate(int dir, uint8_t *param, bool through_carry) {
 	int shifted_out = (dir==ROT_LEFT) ? *param>>7 : *param&1;
 	int shifted_in = through_carry ? regs.F>>4&1 : shifted_out;
 	*param = (dir==ROT_LEFT) ? *param<<1|shifted_in : *param>>1|shifted_in<<7;
-	regs.F = ((*param==0) ? 0x80 : 0) | (shifted_out<<4);
-}
-
-void set_flag(char flag, int val) {
-	for (int i=0; i<4; i++) {
-		if (flag=="ZNHC"[i]) {
-			regs.F = val ? (regs.F|0x80>>i) : (regs.F&~(0x80>>i));
-			return;
-		}
-	}
+	set_flags(!*param, 0, 0, shifted_out);
 }
 
 
@@ -110,11 +108,9 @@ int main() {
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
 			uint8_t *param = get_param(opcode);
-			if (opcode >= 0x40 && opcode < 0x80) {
+			if (opcode >= 0x40 && opcode < 0x80) { // BIT
 				int bit = (opcode-0x40)>>3;
-				set_flag('Z', !(*param & (1 << bit)));
-				set_flag('N', 0);
-				set_flag('H', 1);
+				set_flags(!(*param & (1 << bit)), 0, 1, '-');
 			}
 			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  param, true); }
 			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, param, true); }
