@@ -65,7 +65,7 @@ union {
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
 
-uint8_t *get_param(int i) {
+uint8_t *get_operand(int i) {
 	i &= 0x7;
 	if (i==0) return &regs.B;
 	if (i==1) return &regs.C;
@@ -90,11 +90,11 @@ void set_flags(char Z, char N, char H, char C) {
 	if (C==1) regs.F |= 0x10; else if (C==0) regs.F &= ~0x10;
 }
 
-void rotate(int dir, uint8_t *param, bool through_carry) {
-	int shifted_out = (dir==ROT_LEFT) ? *param>>7 : *param&1;
+void rotate(int dir, uint8_t *operand, bool through_carry) {
+	int shifted_out = (dir==ROT_LEFT) ? *operand>>7 : *operand&1;
 	int shifted_in = through_carry ? FLAG_C : shifted_out;
-	*param = (dir==ROT_LEFT) ? *param<<1|shifted_in : *param>>1|shifted_in<<7;
-	set_flags(!*param, 0, 0, shifted_out);
+	*operand = (dir==ROT_LEFT) ? *operand<<1|shifted_in : *operand>>1|shifted_in<<7;
+	set_flags(!*operand, 0, 0, shifted_out);
 }
 
 void add(int b) {
@@ -148,13 +148,13 @@ int main() {
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
 			cycles += ((opcode&0x7)==6) ? 16 : 8;
-			uint8_t *param = get_param(opcode);
+			uint8_t *operand = get_operand(opcode);
 			if (opcode >= 0x40 && opcode < 0x80) { // BIT
 				int bit = (opcode-0x40)>>3;
-				set_flags(!(*param & (1 << bit)), 0, 1, '-');
+				set_flags(!(*operand & (1 << bit)), 0, 1, '-');
 			}
-			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  param, true); }
-			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, param, true); }
+			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  operand, true); }
+			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, operand, true); }
 			else {
 				exit(printf("Unknown opcode: 0xcb %#x\n", opcode));
 			}
@@ -164,10 +164,10 @@ int main() {
 		else if (opcode==0x28) { if (FLAG_Z) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR Z
 		else if (opcode==0x30) { if (!FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR NC
 		else if (opcode==0x38) { if (FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR C
-		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_param(opcode>>3) += 1; }
-		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_param(opcode>>3) -= 1; }
-		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_param(opcode>>3) = mem[PC++]; }
-		else if (opcode >= 0x40 && opcode < 0x80) { *get_param((opcode-0x40)>>3) = *get_param(opcode); }
+		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_operand(opcode>>3) += 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_operand(opcode>>3) -= 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_operand(opcode>>3) = mem[PC++]; }
+		else if (opcode >= 0x40 && opcode < 0x80) { *get_operand((opcode-0x40)>>3) = *get_operand(opcode); }
 		else if (opcode==0xe0) { mem[0xff00+mem[PC++]] = regs.A; }
 		else if (opcode==0xf0) { regs.A = mem[0xff00+mem[PC++]]; }
 		else if (opcode==0xe2) { mem[0xff00+regs.C] = regs.A; }
@@ -190,11 +190,11 @@ int main() {
 		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
 		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
 		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
-		else if (opcode >= 0x80 && opcode < 0x88) { add(*get_param(opcode)); } // ADD
+		else if (opcode >= 0x80 && opcode < 0x88) { add(*get_operand(opcode)); } // ADD
 		else if (opcode==0xc6) { add(mem[PC++]); }
-		else if (opcode >= 0x90 && opcode < 0x98) { subtract(*get_param(opcode)); } // SUB
+		else if (opcode >= 0x90 && opcode < 0x98) { subtract(*get_operand(opcode)); } // SUB
 		else if (opcode==0xd6) { subtract(mem[PC++]); }
-		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_param(opcode)); } // CP
+		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_operand(opcode)); } // CP
 		else if (opcode==0xfe) { compare(mem[PC++]); }
 		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
 		else if (opcode==0xfa) { regs.A = mem[read16()]; }
