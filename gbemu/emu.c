@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdint.h>
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
 
 #define ROT_LEFT 0
 #define ROT_RIGHT 1
@@ -65,6 +67,7 @@ union {
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
 int scanlineCycles;
+int frameCycles;
 
 uint8_t *get_operand(int i) {
 	i &= 0x7;
@@ -116,16 +119,25 @@ void subtract(int b) {
 
 
 int main() {
+	SDL_Window *window;
+	SDL_Surface *surface;
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+        return 1;
+	}
+	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 256, 0);
+	//window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
+	surface = SDL_GetWindowSurface(window);
 	memcpy(mem, bootrom, sizeof(bootrom));
 	while (true) {
-		char flag_str[4];
-		flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
-		flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
-		flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
-		flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
-		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %.4s Opcode=%-2x\n",
-				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
-		//fflush(stdout);
+//		char flag_str[4];
+//		flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
+//		flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
+//		flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
+//		flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
+//		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %.4s Opcode=%-2x\n",
+//				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
+//		fflush(stdout);
 		uint8_t opcode = mem[PC++];
 		int cycles = cycleTable[opcode];
 		if (opcode==0x01)      { regs.BC = read16(); }
@@ -204,7 +216,7 @@ int main() {
 			exit(EXIT_FAILURE);
 		}
 		scanlineCycles += cycles;
-		if (scanlineCycles > 456) {
+		if (scanlineCycles >= 456) {
 			scanlineCycles -= 456;
 			mem[0xff44]++;
 			if (mem[0xff44] > 153)
@@ -221,5 +233,21 @@ int main() {
 			lcd_mode = 2;
 		mem[0xff41] &= ~3;
 		mem[0xff41] |= lcd_mode;
+
+		frameCycles += cycles;
+		if (frameCycles >= 70224) {
+			frameCycles -= 70224;
+			SDL_Event e;
+			while (SDL_PollEvent(&e)) {
+				if (e.type == SDL_KEYDOWN) {
+					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+						exit(0);
+				}
+			}
+			SDL_UpdateWindowSurface(window);
+			printf("Scroll Y: %d\n", mem[0xff42]);
+			fflush(stdout);
+			SDL_Delay(16);
+		}
 	}
 }
