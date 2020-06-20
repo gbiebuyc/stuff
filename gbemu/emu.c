@@ -41,6 +41,24 @@ uint8_t bootrom[] = {
   0xf5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xfb, 0x86, 0x20, 0xfe,
   0x3e, 0x01, 0xe0, 0x50
 };
+uint8_t cycleTable[256] = { // Duration in cycles of each cpu instruction.
+	4,12,8,8,4,4,8,4,20,8,8,8,4,4,8,4,
+	4,12,8,8,4,4,8,4,12,8,8,8,4,4,8,4,
+	8,12,8,8,4,4,8,4,8,8,8,8,4,4,8,4,
+	8,12,8,8,12,12,12,4,8,8,8,8,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	8,8,8,8,8,8,4,8,4,4,4,4,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	4,4,4,4,4,4,8,4,4,4,4,4,4,4,8,4,
+	8,12,12,16,12,16,8,16,8,16,12,4,12,24,8,16,
+	8,12,12,0,12,16,8,16,8,16,12,0,12,0,8,16,
+	12,12,8,0,0,16,8,16,16,4,16,0,0,0,8,16,
+	12,12,8,4,0,16,8,16,12,8,16,4,0,0,8,16
+};
 uint16_t PC, SP;
 union {
 	struct { uint16_t AF, BC, DE, HL; };
@@ -108,6 +126,7 @@ int main() {
 				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
 		//fflush(stdout);
 		uint8_t opcode = mem[PC++];
+		int cycles = cycleTable[opcode];
 		if (opcode==0x01)      { regs.BC = read16(); }
 		else if (opcode==0x11) { regs.DE = read16(); }
 		else if (opcode==0x21) { regs.HL = read16(); }
@@ -128,6 +147,7 @@ int main() {
 		else if (opcode==0x1f) { rotate(ROT_RIGHT, &regs.A, true); }
 		else if (opcode==0xcb) {
 			opcode = mem[PC++];
+			cycles += ((opcode&0x7)==6) ? 16 : 8;
 			uint8_t *param = get_param(opcode);
 			if (opcode >= 0x40 && opcode < 0x80) { // BIT
 				int bit = (opcode-0x40)>>3;
@@ -138,13 +158,12 @@ int main() {
 			else {
 				exit(printf("Unknown opcode: 0xcb %#x\n", opcode));
 			}
-
 		}
 		else if (opcode==0x18) { PC += (int8_t)mem[PC++]; } // JR
-		else if (opcode==0x20) { if (!FLAG_Z) PC += (int8_t)mem[PC]; PC++; } // JR NZ
-		else if (opcode==0x28) { if (FLAG_Z) PC += (int8_t)mem[PC]; PC++; } // JR Z
-		else if (opcode==0x30) { if (!FLAG_C) PC += (int8_t)mem[PC]; PC++; } // JR NC
-		else if (opcode==0x38) { if (FLAG_C) PC += (int8_t)mem[PC]; PC++; } // JR C
+		else if (opcode==0x20) { if (!FLAG_Z) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR NZ
+		else if (opcode==0x28) { if (FLAG_Z) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR Z
+		else if (opcode==0x30) { if (!FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR NC
+		else if (opcode==0x38) { if (FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR C
 		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_param(opcode>>3) += 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_param(opcode>>3) -= 1; }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_param(opcode>>3) = mem[PC++]; }
