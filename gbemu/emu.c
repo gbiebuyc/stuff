@@ -64,6 +64,7 @@ union {
 	struct { uint16_t AF, BC, DE, HL; };
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
+int scanlineCycles;
 
 uint8_t *get_operand(int i) {
 	i &= 0x7;
@@ -202,5 +203,23 @@ int main() {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
 		}
+		scanlineCycles += cycles;
+		if (scanlineCycles > 456) {
+			scanlineCycles -= 456;
+			mem[0xff44]++;
+			if (mem[0xff44] > 153)
+				mem[0xff44] = 0;
+		}
+		int lcd_mode = 0;
+		if (mem[0xff44] >= 144)
+			lcd_mode = 1;
+		else if (scanlineCycles >= 252)
+			lcd_mode = 0;
+		else if (scanlineCycles >= 80)
+			lcd_mode = 3;
+		else
+			lcd_mode = 2;
+		mem[0xff41] &= ~3;
+		mem[0xff41] |= lcd_mode;
 	}
 }
