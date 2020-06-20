@@ -244,6 +244,34 @@ int main() {
 						exit(0);
 				}
 			}
+			int BGTileMap = 0x9800;
+			int TileData =0x8000;
+			for (int y=0; y<32; y++) {
+				for (int x=0; x<32; x++) {
+					int tileIndex = mem[BGTileMap + y*32 + x];
+					uint8_t *tile = mem + TileData + tileIndex*16;
+					for (int v=0; v<8; v++) {
+						uint8_t byte0 = tile[v*2];
+						uint8_t byte1 = tile[v*2+1];
+						int yy = y*8 + v;
+						for (int u=0; u<8; u++) {
+							int bit0 = (byte0>>(7-u))&1;
+							int bit1 = (byte1>>(7-u))&1;
+							int xx = x*8 + u;
+							int col = (bit0<<1) | bit1;
+							if (col==0)
+								col = 0;
+							else if (col==1)
+								col==0xff0000;
+							else if (col==2)
+								col==0x00ff00;
+							else if (col==3)
+								col==0x0000ff;
+							((uint32_t*)surface->pixels)[yy*256 + xx] = col;
+						}
+					}
+				}
+			}
 			SDL_UpdateWindowSurface(window);
 			printf("Scroll Y: %d\n", mem[0xff42]);
 			fflush(stdout);
