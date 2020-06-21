@@ -262,11 +262,11 @@ int main() {
 							if (col==0)
 								col = 0;
 							else if (col==1)
-								col==0xff0000;
+								col = 0xff0000;
 							else if (col==2)
-								col==0x00ff00;
+								col = 0x00ff00;
 							else if (col==3)
-								col==0x0000ff;
+								col = 0x0000ff;
 							((uint32_t*)surface->pixels)[yy*256 + xx] = col;
 						}
 					}
