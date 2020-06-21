@@ -135,8 +135,7 @@ int main() {
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         return 1;
 	}
-	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 256, 0);
-	//window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
+	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
 	surface = SDL_GetWindowSurface(window);
 	memset(mem, 0, sizeof(mem));
 	FILE *f = fopen("tetris.gb", "rb");
@@ -147,8 +146,8 @@ int main() {
 	memcpy(mem, bootrom, sizeof(bootrom));
 	bool debug = false;
 	while (true) {
-		if (PC >= 0xc)
-			debug = true;
+		// if (PC >= 0xc)
+		// 	debug = true;
 		if (debug) {
 			char flag_str[4];
 			flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
@@ -265,32 +264,32 @@ int main() {
 						exit(0);
 				}
 			}
-			int BGTileMap = 0x9800;
-			int TileData =0x8000;
-			for (int y=0; y<32; y++) {
-				for (int x=0; x<32; x++) {
-					int tileIndex = mem[BGTileMap + y*32 + x];
-					uint8_t *tile = mem + TileData + tileIndex*16;
-					for (int v=0; v<8; v++) {
-						uint8_t byte0 = tile[v*2];
-						uint8_t byte1 = tile[v*2+1];
-						int yy = y*8 + v;
-						for (int u=0; u<8; u++) {
-							int bit0 = (byte0>>(7-u))&1;
-							int bit1 = (byte1>>(7-u))&1;
-							int xx = x*8 + u;
-							int col = (bit0<<1) | bit1;
-							if (col==0)
-								col = 0;
-							else if (col==1)
-								col = 0xff0000;
-							else if (col==2)
-								col = 0x00ff00;
-							else if (col==3)
-								col = 0x0000ff;
-							((uint32_t*)surface->pixels)[yy*256 + xx] = col;
-						}
-					}
+			uint8_t *BGTileMap = mem+0x9800;
+			uint8_t *TileData = mem+0x8000;
+			for (int sy=0; sy<144; sy++) {
+				for (int sx=0; sx<160; sx++) {
+					int x = sx+mem[0xff43];
+					int y = sy+mem[0xff42];
+					int tileX = x>>3;
+					int tileY = y>>3;
+					int u = x&7;
+					int v = y&7;
+					int tileIndex = BGTileMap[tileY*32 + tileX];
+					uint8_t *tile = TileData + tileIndex*16;
+					uint8_t byte0 = tile[v*2];
+					uint8_t byte1 = tile[v*2+1];
+					int bit0 = (byte0>>(7-u))&1;
+					int bit1 = (byte1>>(7-u))&1;
+					int col = (bit0<<1) | bit1;
+					if (col==0)
+						col = 0;
+					else if (col==1)
+						col = 0xff0000;
+					else if (col==2)
+						col = 0x00ff00;
+					else if (col==3)
+						col = 0x0000ff;
+					((uint32_t*)surface->pixels)[sy*160 + sx] = col;
 				}
 			}
 			SDL_UpdateWindowSurface(window);
