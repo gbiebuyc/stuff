@@ -242,7 +242,7 @@ int main() {
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
 		}
-		int lcd_mode = 0;
+		int lcd_mode;
 		if (mem[0xff44] >= 144)
 			lcd_mode = 1;
 		else if (scanlineCycles >= 252)
