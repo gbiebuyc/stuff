@@ -216,14 +216,14 @@ int main() {
 		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
 		else if (opcode==0xcd) { SP-=2; mem[SP]=PC+2; PC=read16(); } // CALL
 		else if (opcode==0xc9) { PC=mem[SP]; SP+=2; } // RET
-		else if (opcode==0xc5) { SP-=2; mem[SP]=regs.BC; } // PUSH
-		else if (opcode==0xd5) { SP-=2; mem[SP]=regs.DE; }
-		else if (opcode==0xe5) { SP-=2; mem[SP]=regs.HL; }
-		else if (opcode==0xf5) { SP-=2; mem[SP]=regs.AF; }
-		else if (opcode==0xc1) { regs.BC=mem[SP]; SP+=2; } // POP
-		else if (opcode==0xd1) { regs.DE=mem[SP]; SP+=2; }
-		else if (opcode==0xe1) { regs.HL=mem[SP]; SP+=2; }
-		else if (opcode==0xf1) { regs.AF=mem[SP]; SP+=2; }
+		else if (opcode==0xc5) { SP-=2; *(uint16_t*)(mem+SP)=regs.BC; } // PUSH
+		else if (opcode==0xd5) { SP-=2; *(uint16_t*)(mem+SP)=regs.DE; }
+		else if (opcode==0xe5) { SP-=2; *(uint16_t*)(mem+SP)=regs.HL; }
+		else if (opcode==0xf5) { SP-=2; *(uint16_t*)(mem+SP)=regs.AF; }
+		else if (opcode==0xc1) { regs.BC=*(uint16_t*)(mem+SP); SP+=2; } // POP
+		else if (opcode==0xd1) { regs.DE=*(uint16_t*)(mem+SP); SP+=2; }
+		else if (opcode==0xe1) { regs.HL=*(uint16_t*)(mem+SP); SP+=2; }
+		else if (opcode==0xf1) { regs.AF=*(uint16_t*)(mem+SP); SP+=2; }
 		else if (opcode >= 0x80 && opcode < 0x88) { add(*get_operand(opcode)); } // ADD
 		else if (opcode==0xc6) { add(mem[PC++]); }
 		else if (opcode >= 0x90 && opcode < 0x98) { subtract(*get_operand(opcode)); } // SUB
