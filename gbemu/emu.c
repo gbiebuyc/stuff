@@ -268,8 +268,8 @@ int main() {
 			uint8_t *TileData = mem+0x8000;
 			for (int sy=0; sy<144; sy++) {
 				for (int sx=0; sx<160; sx++) {
-					int x = sx+mem[0xff43];
-					int y = sy+mem[0xff42];
+					int x = (sx+mem[0xff43])&0xff;
+					int y = (sy+mem[0xff42])&0xff;
 					int tileX = x>>3;
 					int tileY = y>>3;
 					int u = x&7;
@@ -280,21 +280,13 @@ int main() {
 					uint8_t byte1 = tile[v*2+1];
 					int bit0 = (byte0>>(7-u))&1;
 					int bit1 = (byte1>>(7-u))&1;
-					int col = (bit0<<1) | bit1;
-					if (col==0)
-						col = 0;
-					else if (col==1)
-						col = 0xff0000;
-					else if (col==2)
-						col = 0x00ff00;
-					else if (col==3)
-						col = 0x0000ff;
+					int32_t col = (bit0<<1) | bit1;
+					int32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0};
+					col = palette[(mem[0xff47]>>col)&3];
 					((uint32_t*)surface->pixels)[sy*160 + sx] = col;
 				}
 			}
 			SDL_UpdateWindowSurface(window);
-			printf("Scroll Y: %d\n", mem[0xff42]);
-			fflush(stdout);
 			SDL_Delay(16);
 		}
 	}
