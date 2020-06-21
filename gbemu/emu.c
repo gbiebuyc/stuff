@@ -117,6 +117,16 @@ void subtract(int b) {
 	regs.A -= b;
 }
 
+void increment(uint8_t *operand) {
+	set_flags(*operand==0xff, 0, (((*operand&0xf)+1)&0x10)==0x10, '-');
+	++*operand;
+}
+
+void decrement(uint8_t *operand) {
+	set_flags(*operand==1, 1, ((((int)*operand)&0xf)-1)<0, '-');
+	--*operand;
+}
+
 
 int main() {
 	SDL_Window *window;
@@ -128,16 +138,27 @@ int main() {
 	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 256, 0);
 	//window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
 	surface = SDL_GetWindowSurface(window);
+	memset(mem, 0, sizeof(mem));
+	FILE *f = fopen("tetris.gb", "rb");
+	if (!f) exit(printf("fopen fail"));
+	int x = fread(mem, 1, 2002, f);
+	printf("size read: %d\n", x);
+	fclose(f);
 	memcpy(mem, bootrom, sizeof(bootrom));
+	bool debug = false;
 	while (true) {
-//		char flag_str[4];
-//		flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
-//		flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
-//		flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
-//		flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
-//		printf("AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x PC=%-4x %.4s Opcode=%-2x\n",
-//				regs.AF, regs.BC, regs.DE, regs.HL, SP, PC, flag_str, mem[PC]);
-//		fflush(stdout);
+		if (PC >= 0xc)
+			debug = true;
+		if (debug) {
+			char flag_str[4];
+			flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
+			flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
+			flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
+			flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
+			printf("PC=%-4x AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x %.4s Opcode=%-2x\n",
+					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, mem[PC]);
+			fflush(stdout);
+		}
 		uint8_t opcode = mem[PC++];
 		int cycles = cycleTable[opcode];
 		if (opcode==0x01)      { regs.BC = read16(); }
@@ -177,8 +198,8 @@ int main() {
 		else if (opcode==0x28) { if (FLAG_Z) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR Z
 		else if (opcode==0x30) { if (!FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR NC
 		else if (opcode==0x38) { if (FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR C
-		else if (opcode < 0x40 && (opcode&0x7)==4) { *get_operand(opcode>>3) += 1; }
-		else if (opcode < 0x40 && (opcode&0x7)==5) { *get_operand(opcode>>3) -= 1; }
+		else if (opcode < 0x40 && (opcode&0x7)==4) { increment(get_operand(opcode>>3)); }
+		else if (opcode < 0x40 && (opcode&0x7)==5) { decrement(get_operand(opcode>>3)); }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_operand(opcode>>3) = mem[PC++]; }
 		else if (opcode >= 0x40 && opcode < 0x80) { *get_operand((opcode-0x40)>>3) = *get_operand(opcode); }
 		else if (opcode==0xe0) { mem[0xff00+mem[PC++]] = regs.A; }
