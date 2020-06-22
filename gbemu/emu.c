@@ -149,6 +149,11 @@ void xor(uint8_t operand) {
 	set_flags(!regs.A, 0, 0, 0);
 }
 
+void or(uint8_t operand) {
+	regs.A |= operand;
+	set_flags(!regs.A, 0, 0, 0);
+}
+
 
 int main() {
 	SDL_Window *window;
@@ -257,6 +262,8 @@ int main() {
 		else if (opcode==0xe6) { and(mem[PC++]); }
 		else if (opcode >= 0xa8 && opcode < 0xb0) { xor(*get_operand(opcode)); } // XOR
 		else if (opcode==0xee) { xor(mem[PC++]); }
+		else if (opcode >= 0xb0 && opcode < 0xb8) { or(*get_operand(opcode)); } // OR
+		else if (opcode==0xf6) { or(mem[PC++]); }
 		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_operand(opcode)); } // CP
 		else if (opcode==0xfe) { compare(mem[PC++]); }
 		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
