@@ -18,7 +18,7 @@
 #define FLAG_H (regs.F>>5&1)
 #define FLAG_C (regs.F>>4&1)
 
-uint8_t mem[0xffff];
+uint8_t mem[0x10000];
 uint8_t bootrom[] = {
   0x31, 0xfe, 0xff, 0xaf, 0x21, 0xff, 0x9f, 0x32, 0xcb, 0x7c, 0x20, 0xfb,
   0x21, 0x26, 0xff, 0x0e, 0x11, 0x3e, 0x80, 0x32, 0xe2, 0x0c, 0x3e, 0xf3,
@@ -162,7 +162,7 @@ int main() {
 	memset(mem, 0, sizeof(mem));
 	FILE *f = fopen("tetris.gb", "rb");
 	if (!f) exit(printf("fopen fail"));
-	int x = fread(mem, 1, 2002, f);
+	int x = fread(mem, 1, 0x10000, f);
 	printf("size read: %d\n", x);
 	fclose(f);
 	memcpy(mem, bootrom, sizeof(bootrom));
@@ -264,7 +264,7 @@ int main() {
 		else if (opcode==0xf3) { IME = 0; } // DI
 		else if (opcode==0xfb) { IME = 1; } // EI
 		else {
-			printf("Unknown opcode: %#x\n", opcode);
+			printf("Unknown opcode: %#x at PC=%#x\n", opcode, PC-1);
 			exit(EXIT_FAILURE);
 		}
 		scanlineCycles += cycles;
