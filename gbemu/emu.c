@@ -144,6 +144,11 @@ void and(uint8_t operand) {
 	set_flags(!regs.A, 0, 1, 0);
 }
 
+void xor(uint8_t operand) {
+	regs.A ^= operand;
+	set_flags(!regs.A, 0, 0, 0);
+}
+
 
 int main() {
 	SDL_Window *window;
@@ -190,8 +195,6 @@ int main() {
 		else if (opcode==0x1b) { regs.DE--; }
 		else if (opcode==0x2b) { regs.HL--; }
 		else if (opcode==0x3b) { SP--; }
-		else if (opcode==0xaf) { regs.A = 0; }
-		else if (opcode==0x32) { mem[regs.HL--] = regs.A; }
 		else if (opcode==0x07) { rotate(ROT_LEFT,  &regs.A, false); }
 		else if (opcode==0x0f) { rotate(ROT_RIGHT, &regs.A, false); }
 		else if (opcode==0x17) { rotate(ROT_LEFT,  &regs.A, true); }
@@ -252,6 +255,8 @@ int main() {
 		else if (opcode==0xd6) { subtract(mem[PC++]); }
 		else if (opcode >= 0xa0 && opcode < 0xa8) { and(*get_operand(opcode)); } // AND
 		else if (opcode==0xe6) { and(mem[PC++]); }
+		else if (opcode >= 0xa8 && opcode < 0xb0) { xor(*get_operand(opcode)); } // XOR
+		else if (opcode==0xee) { xor(mem[PC++]); }
 		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_operand(opcode)); } // CP
 		else if (opcode==0xfe) { compare(mem[PC++]); }
 		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
