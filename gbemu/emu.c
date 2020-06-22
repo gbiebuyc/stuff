@@ -68,6 +68,7 @@ union {
 } regs;
 int scanlineCycles;
 int frameCycles;
+bool IME;
 
 uint8_t *get_operand(int i) {
 	i &= 0x7;
@@ -248,6 +249,8 @@ int main() {
 		else if (opcode==0xfe) { compare(mem[PC++]); }
 		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
 		else if (opcode==0xfa) { regs.A = mem[read16()]; }
+		else if (opcode==0xf3) { IME = 0; } // DI
+		else if (opcode==0xfb) { IME = 1; } // EI
 		else {
 			printf("Unknown opcode: %#x\n", opcode);
 			exit(EXIT_FAILURE);
@@ -270,6 +273,20 @@ int main() {
 			lcd_mode = 2;
 		mem[0xff41] &= ~3;
 		mem[0xff41] |= lcd_mode;
+
+		// Interrupts
+		if (IME && mem[0xff0f] && mem[0xffff]) {
+			for (int i=0; i<5; i++) {
+				int mask = 1<<i;
+				if ((mem[0xff0f]&mask) && (mem[0xffff]&mask)) {
+					push(PC);
+					PC = "@HPX`"[i];
+					mem[0xff0f] &= ~mask;
+					IME = 0;
+					break;
+				}
+			}
+		}
 
 		frameCycles += cycles;
 		if (frameCycles >= 70224) {
