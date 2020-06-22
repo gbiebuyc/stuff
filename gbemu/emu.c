@@ -171,7 +171,8 @@ int main() {
 		}
 		uint8_t opcode = mem[PC++];
 		int cycles = cycleTable[opcode];
-		if (opcode==0x01)      { regs.BC = read16(); }
+		if (opcode==0) {} // NOP
+		else if (opcode==0x01) { regs.BC = read16(); }
 		else if (opcode==0x11) { regs.DE = read16(); }
 		else if (opcode==0x21) { regs.HL = read16(); }
 		else if (opcode==0x31) { SP = read16(); }
@@ -203,11 +204,16 @@ int main() {
 				exit(printf("Unknown opcode: 0xcb %#x\n", opcode));
 			}
 		}
-		else if (opcode==0x18) { PC += (int8_t)mem[PC++]; } // JR
-		else if (opcode==0x20) { if (!FLAG_Z) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR NZ
-		else if (opcode==0x28) { if (FLAG_Z) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR Z
-		else if (opcode==0x30) { if (!FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR NC
-		else if (opcode==0x38) { if (FLAG_C) {PC+=(int8_t)mem[PC]; cycles+=4;} PC++; } // JR C
+		else if (opcode==0x18) { int8_t i=mem[PC++]; PC+=i; } // JR
+		else if (opcode==0x20) { int8_t i=mem[PC++]; if (!FLAG_Z) {PC+=i; cycles+=4;} } // JR NZ
+		else if (opcode==0x28) { int8_t i=mem[PC++]; if (FLAG_Z) {PC+=i; cycles+=4;} } // JR Z
+		else if (opcode==0x30) { int8_t i=mem[PC++]; if (!FLAG_C) {PC+=i; cycles+=4;} } // JR NC
+		else if (opcode==0x38) { int8_t i=mem[PC++]; if (FLAG_C) {PC+=i; cycles+=4;} } // JR C
+		else if (opcode==0xc3) { int addr=read16(); PC=addr; } // JP
+		else if (opcode==0xc2) { int addr=read16(); if (!FLAG_Z) {PC=addr; cycles+=4;} } // JP NZ
+		else if (opcode==0xca) { int addr=read16(); if (FLAG_Z) {PC=addr; cycles+=4;} } // JP Z
+		else if (opcode==0xd2) { int addr=read16(); if (!FLAG_C) {PC=addr; cycles+=4;} } // JP NC
+		else if (opcode==0xda) { int addr=read16(); if (FLAG_C) {PC=addr; cycles+=4;} } // JP C
 		else if (opcode < 0x40 && (opcode&0x7)==4) { increment(get_operand(opcode>>3)); }
 		else if (opcode < 0x40 && (opcode&0x7)==5) { decrement(get_operand(opcode>>3)); }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_operand(opcode>>3) = mem[PC++]; }
@@ -291,8 +297,8 @@ int main() {
 					uint8_t byte1 = tile[v*2+1];
 					int bit0 = (byte0>>(7-u))&1;
 					int bit1 = (byte1>>(7-u))&1;
-					int32_t col = (bit0<<1) | bit1;
-					int32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0};
+					uint32_t col = (bit0<<1) | bit1;
+					uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0};
 					col = palette[(mem[0xff47]>>col)&3];
 					((uint32_t*)surface->pixels)[sy*160 + sx] = col;
 				}
