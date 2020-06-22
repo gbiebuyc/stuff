@@ -139,6 +139,11 @@ uint16_t pop() {
 	return val;
 }
 
+void and(uint8_t operand) {
+	regs.A &= operand;
+	set_flags(!regs.A, 0, 1, 0);
+}
+
 
 int main() {
 	SDL_Window *window;
@@ -245,6 +250,8 @@ int main() {
 		else if (opcode==0xc6) { add(mem[PC++]); }
 		else if (opcode >= 0x90 && opcode < 0x98) { subtract(*get_operand(opcode)); } // SUB
 		else if (opcode==0xd6) { subtract(mem[PC++]); }
+		else if (opcode >= 0xa0 && opcode < 0xa8) { and(*get_operand(opcode)); } // AND
+		else if (opcode==0xe6) { and(mem[PC++]); }
 		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_operand(opcode)); } // CP
 		else if (opcode==0xfe) { compare(mem[PC++]); }
 		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
