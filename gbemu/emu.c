@@ -154,6 +154,15 @@ void or(uint8_t operand) {
 	set_flags(!regs.A, 0, 0, 0);
 }
 
+void swap(uint8_t *operand) {
+	*operand = ((*operand)>>4) | ((*operand)<<4);
+	set_flags(!*operand, 0, 0, 0);
+}
+
+void testBit(uint8_t *operand, int bit) {
+	set_flags(!(*operand & (1 << bit)), 0, 1, '-');
+}
+
 
 int main() {
 	SDL_Window *window;
@@ -214,12 +223,13 @@ int main() {
 			opcode = mem[PC++];
 			cycles += ((opcode&0x7)==6) ? 16 : 8;
 			uint8_t *operand = get_operand(opcode);
-			if (opcode >= 0x40 && opcode < 0x80) { // BIT
-				int bit = (opcode-0x40)>>3;
-				set_flags(!(*operand & (1 << bit)), 0, 1, '-');
-			}
+			int bit = (opcode>>3)&7;
+			if (opcode >= 0x40 && opcode < 0x80) { testBit(operand, bit); }
 			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  operand, true); }
 			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, operand, true); }
+			else if (opcode >= 0x30 && opcode < 0x38) { swap(operand); }
+			else if (opcode >= 0x80 && opcode < 0xc0) { *operand &= ~(1<<bit); } // RES
+			else if (opcode >= 0xc0) { *operand |= (1<<bit); } // SET
 			else {
 				exit(printf("Unknown opcode: 0xcb %#x\n", opcode));
 			}
@@ -234,6 +244,7 @@ int main() {
 		else if (opcode==0xca) { int addr=read16(); if (FLAG_Z) {PC=addr; cycles+=4;} } // JP Z
 		else if (opcode==0xd2) { int addr=read16(); if (!FLAG_C) {PC=addr; cycles+=4;} } // JP NC
 		else if (opcode==0xda) { int addr=read16(); if (FLAG_C) {PC=addr; cycles+=4;} } // JP C
+		else if (opcode==0xe9) { PC = regs.HL; } // JP HL
 		else if (opcode < 0x40 && (opcode&0x7)==4) { increment(get_operand(opcode>>3)); }
 		else if (opcode < 0x40 && (opcode&0x7)==5) { decrement(get_operand(opcode>>3)); }
 		else if (opcode < 0x40 && (opcode&0x7)==6) { *get_operand(opcode>>3) = mem[PC++]; }
@@ -252,6 +263,11 @@ int main() {
 		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
 		else if (opcode==0xcd) { push(PC+2); PC=read16(); } // CALL
 		else if (opcode==0xc9) { PC=pop(); } // RET
+		else if (opcode==0xc0) { if (!FLAG_Z) PC=pop(); } // RET NZ
+		else if (opcode==0xc8) { if (FLAG_Z) PC=pop(); } // RET Z
+		else if (opcode==0xd0) { if (!FLAG_C) PC=pop(); } // RET NC
+		else if (opcode==0xd8) { if (FLAG_C) PC=pop(); } // RET C
+		else if (opcode==0xd9) { PC=pop(); IME=1; } // RETI
 		else if (opcode==0xc5) { push(regs.BC); } // PUSH
 		else if (opcode==0xd5) { push(regs.DE); }
 		else if (opcode==0xe5) { push(regs.HL); }
@@ -276,6 +292,12 @@ int main() {
 		else if (opcode==0xfa) { regs.A = mem[read16()]; }
 		else if (opcode==0xf3) { IME = 0; } // DI
 		else if (opcode==0xfb) { IME = 1; } // EI
+		else if (opcode==0x2f) { regs.A = ~regs.A; set_flags('-', 1, 1, '-'); } // CPL
+		else if (opcode>0xc0 && (opcode&0x7)==7) { push(PC); PC=opcode-0xc7; } // RST
+		else if (opcode==0x09) { regs.HL+=regs.BC; set_flags('-', 0, 0, 0); } // ADD
+		else if (opcode==0x19) { regs.HL+=regs.DE; set_flags('-', 0, 0, 0); }
+		else if (opcode==0x29) { regs.HL+=regs.HL; set_flags('-', 0, 0, 0); }
+		else if (opcode==0x39) { regs.HL+=SP; set_flags('-', 0, 0, 0); }
 		else {
 			printf("Unknown opcode: %#x at PC=%#x\n", opcode, PC-1);
 			exit(EXIT_FAILURE);
