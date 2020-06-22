@@ -18,7 +18,7 @@
 #define FLAG_H (regs.F>>5&1)
 #define FLAG_C (regs.F>>4&1)
 
-uint8_t mem[0x10000];
+uint8_t *mem;
 uint8_t bootrom[] = {
   0x31, 0xfe, 0xff, 0xaf, 0x21, 0xff, 0x9f, 0x32, 0xcb, 0x7c, 0x20, 0xfb,
   0x21, 0x26, 0xff, 0x0e, 0x11, 0x3e, 0x80, 0x32, 0xe2, 0x0c, 0x3e, 0xf3,
@@ -164,17 +164,23 @@ int main() {
 	}
 	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
 	surface = SDL_GetWindowSurface(window);
-	memset(mem, 0, sizeof(mem));
-	FILE *f = fopen("tetris.gb", "rb");
-	if (!f) exit(printf("fopen fail"));
-	int x = fread(mem, 1, 0x10000, f);
-	printf("size read: %d\n", x);
-	fclose(f);
+	mem = malloc(0x10000);
+	uint8_t *gamerom = malloc(8388608); // max 8 MB cartridges
+	int readSize = fread(gamerom, 1, 999999, fopen("tetris.gb", "rb"));
+	if (readSize>32768)
+		exit(printf("Only supports 32768 byte roms for now."));
+	printf("read size: %d\n", readSize);
+	memcpy(mem, gamerom, 32768);
 	memcpy(mem, bootrom, sizeof(bootrom));
+	bool isBootROMUnmapped = false;
 	bool debug = false;
 	while (true) {
 		// if (PC >= 0xc)
 		// 	debug = true;
+		if (!isBootROMUnmapped && PC >= 0x100) {
+			memcpy(mem, gamerom, 32768);
+			isBootROMUnmapped = true;
+		}
 		if (debug) {
 			char flag_str[4];
 			flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
@@ -281,6 +287,8 @@ int main() {
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
 		}
+		if (mem[0xff44]==144)
+			mem[0xff0f] |= 1; // V-Blank interrupt
 		int lcd_mode;
 		if (mem[0xff44] >= 144)
 			lcd_mode = 1;
@@ -312,9 +320,14 @@ int main() {
 			frameCycles -= 70224;
 			SDL_Event e;
 			while (SDL_PollEvent(&e)) {
+				if (e.type == SDL_QUIT)
+					exit(0);
 				if (e.type == SDL_KEYDOWN) {
-					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+						printf("0xffff: %x\n", mem[0xffff]);
+						printf("0xff40: %x\n", mem[0xff40]);
 						exit(0);
+					}
 				}
 			}
 			uint8_t *BGTileMap = mem+0x9800;
