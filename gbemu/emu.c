@@ -386,12 +386,10 @@ int main() {
 					int v = y&7;
 					int tileIndex = BGTileMap[tileY*32 + tileX];
 					uint8_t *tile = TileData + tileIndex*16;
-					uint8_t byte0 = tile[v*2];
-					uint8_t byte1 = tile[v*2+1];
-					int bit0 = (byte0>>(7-u))&1;
-					int bit1 = (byte1>>(7-u))&1;
-					uint32_t color = (bit0<<1) | bit1;
-					uint32_t palette[] = {0xffffff, 0x555555, 0xaaaaaa, 0x000000};
+					uint16_t line = ((uint16_t*)tile)[v];
+					line >>= (7-u);
+					uint32_t color = (line>>7&2) | (line&1);
+					uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0x000000};
 					color = palette[(mem[0xff47]>>(color<<1))&3];
 					((uint32_t*)surface->pixels)[sy*160 + sx] = color;
 				}
