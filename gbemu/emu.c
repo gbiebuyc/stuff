@@ -163,6 +163,21 @@ void testBit(uint8_t *operand, int bit) {
 	set_flags(!(*operand & (1 << bit)), 0, 1, '-');
 }
 
+void SLA(uint8_t *operand) {
+	set_flags(!(*operand<<1), 0, 0, *operand>>7);
+	*operand <<= 1;
+}
+
+void SRA(uint8_t *operand) {
+	set_flags(!(*operand>>1), 0, 0, (*operand)&1);
+	*operand = (*operand>>1) | ((*operand)&0x80);
+}
+
+void SRL(uint8_t *operand) {
+	set_flags(!(*operand>>1), 0, 0, (*operand)&1);
+	*operand >>= 1;
+}
+
 
 int main() {
 	SDL_Window *window;
@@ -187,7 +202,7 @@ int main() {
 		// if (PC >= 0xc)
 		// 	debug = true;
 		if (!isBootROMUnmapped && PC >= 0x100) {
-			memcpy(mem, gamerom, 32768);
+			memcpy(mem, gamerom, 0x100);
 			isBootROMUnmapped = true;
 		}
 		if (debug) {
@@ -227,11 +242,14 @@ int main() {
 			if (opcode >= 0x40 && opcode < 0x80) { testBit(operand, bit); }
 			else if (opcode >= 0x10 && opcode < 0x18) { rotate(ROT_LEFT,  operand, true); }
 			else if (opcode >= 0x18 && opcode < 0x20) { rotate(ROT_RIGHT, operand, true); }
+			else if (opcode >= 0x20 && opcode < 0x28) { SLA(operand); }
+			else if (opcode >= 0x28 && opcode < 0x30) { SRA(operand); }
 			else if (opcode >= 0x30 && opcode < 0x38) { swap(operand); }
+			else if (opcode >= 0x38 && opcode < 0x40) { SRL(operand); }
 			else if (opcode >= 0x80 && opcode < 0xc0) { *operand &= ~(1<<bit); } // RES
 			else if (opcode >= 0xc0) { *operand |= (1<<bit); } // SET
 			else {
-				exit(printf("Unknown opcode: 0xcb %#x\n", opcode));
+				exit(printf("Unknown opcode: 0xcb %#x at PC=%#x\n", opcode, PC-2));
 			}
 		}
 		else if (opcode==0x18) { int8_t i=mem[PC++]; PC+=i; } // JR
@@ -302,6 +320,9 @@ int main() {
 			printf("Unknown opcode: %#x at PC=%#x\n", opcode, PC-1);
 			exit(EXIT_FAILURE);
 		}
+
+		mem[0xff00] |= 0xcf; // Joypad
+
 		scanlineCycles += cycles;
 		if (scanlineCycles >= 456) {
 			scanlineCycles -= 456;
@@ -346,8 +367,9 @@ int main() {
 					exit(0);
 				if (e.type == SDL_KEYDOWN) {
 					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-						printf("0xffff: %x\n", mem[0xffff]);
-						printf("0xff40: %x\n", mem[0xff40]);
+						printf("0xffff ie: %x\n", mem[0xffff]);
+						printf("0xff40 lcdc: %x\n", mem[0xff40]);
+						printf("0xff47 palette: %x\n", mem[0xff47]);
 						exit(0);
 					}
 				}
@@ -369,13 +391,14 @@ int main() {
 					int bit0 = (byte0>>(7-u))&1;
 					int bit1 = (byte1>>(7-u))&1;
 					uint32_t col = (bit0<<1) | bit1;
-					uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0};
-					col = palette[(mem[0xff47]>>col)&3];
+					uint32_t palette[] = {0xffffff, 0x555555, 0xaaaaaa, 0x000000};
+					col = palette[(mem[0xff47]>>(col<<1))&3];
 					((uint32_t*)surface->pixels)[sy*160 + sx] = col;
 				}
 			}
 			SDL_UpdateWindowSurface(window);
-			SDL_Delay(16);
+			// SDL_Delay(16);
+			SDL_Delay(5);
 		}
 	}
 }
