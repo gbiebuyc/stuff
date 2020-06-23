@@ -390,10 +390,10 @@ int main() {
 					uint8_t byte1 = tile[v*2+1];
 					int bit0 = (byte0>>(7-u))&1;
 					int bit1 = (byte1>>(7-u))&1;
-					uint32_t col = (bit0<<1) | bit1;
+					uint32_t color = (bit0<<1) | bit1;
 					uint32_t palette[] = {0xffffff, 0x555555, 0xaaaaaa, 0x000000};
-					col = palette[(mem[0xff47]>>(col<<1))&3];
-					((uint32_t*)surface->pixels)[sy*160 + sx] = col;
+					color = palette[(mem[0xff47]>>(color<<1))&3];
+					((uint32_t*)surface->pixels)[sy*160 + sx] = color;
 				}
 			}
 			SDL_UpdateWindowSurface(window);
