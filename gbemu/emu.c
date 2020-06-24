@@ -179,7 +179,7 @@ void SRL(uint8_t *operand) {
 }
 
 
-int main() {
+int main(int ac, char **av) {
 	SDL_Window *window;
 	SDL_Surface *surface;
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -190,7 +190,7 @@ int main() {
 	surface = SDL_GetWindowSurface(window);
 	mem = malloc(0x10000);
 	uint8_t *gamerom = malloc(8388608); // max 8 MB cartridges
-	int readSize = fread(gamerom, 1, 999999, fopen("tetris.gb", "rb"));
+	int readSize = fread(gamerom, 1, 999999, fopen(av[1], "rb"));
 	if (readSize>32768)
 		exit(printf("Only supports 32768 byte roms for now."));
 	printf("read size: %d\n", readSize);
@@ -279,7 +279,11 @@ int main() {
 		else if (opcode==0x1a) { regs.A = mem[regs.DE]; }
 		else if (opcode==0x2a) { regs.A = mem[regs.HL++]; }
 		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
-		else if (opcode==0xcd) { push(PC+2); PC=read16(); } // CALL
+		else if (opcode==0xcd) { int addr=read16(); push(PC); PC=addr; } // CALL
+		else if (opcode==0xc4) { int addr=read16(); if (!FLAG_Z) {push(PC); PC=addr; cycles+=12;} } // CALL NZ
+		else if (opcode==0xcc) { int addr=read16(); if (FLAG_Z) {push(PC); PC=addr; cycles+=12;} } // CALL Z
+		else if (opcode==0xd4) { int addr=read16(); if (!FLAG_C) {push(PC); PC=addr; cycles+=12;} } // CALL NC
+		else if (opcode==0xdc) { int addr=read16(); if (FLAG_C) {push(PC); PC=addr; cycles+=12;} } // CALL C
 		else if (opcode==0xc9) { PC=pop(); } // RET
 		else if (opcode==0xc0) { if (!FLAG_Z) PC=pop(); } // RET NZ
 		else if (opcode==0xc8) { if (FLAG_Z) PC=pop(); } // RET Z
@@ -394,9 +398,11 @@ int main() {
 					((uint32_t*)surface->pixels)[sy*160 + sx] = color;
 				}
 			}
-			SDL_UpdateWindowSurface(window);
-			// SDL_Delay(16);
-			SDL_Delay(5);
+			if (isBootROMUnmapped) { // Skip display of boot animation
+				SDL_UpdateWindowSurface(window);
+				// SDL_Delay(16);
+				SDL_Delay(5);
+			}
 		}
 	}
 }
