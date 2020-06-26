@@ -56,14 +56,15 @@ void ins0C() {setFlagsInc(regs.C++); }
 void ins1C() {setFlagsInc(regs.E++); }
 void ins2C() {setFlagsInc(regs.L++); }
 void ins3C() {setFlagsInc(regs.A++); }
-void ins05() {setFlagsInc(regs.B--); }
-void ins15() {setFlagsInc(regs.D--); }
-void ins25() {setFlagsInc(regs.H--); }
-void ins35() {uint8_t val=readByte(regs.HL); setFlagsInc(val); writeByte(regs.HL, val--); }
-void ins0D() {setFlagsInc(regs.C--); }
-void ins1D() {setFlagsInc(regs.E--); }
-void ins2D() {setFlagsInc(regs.L--); }
-void ins3D() {setFlagsInc(regs.A--); }
+void setFlagsDec(uint8_t operand) {set_flags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
+void ins05() {setFlagsDec(regs.B--); }
+void ins15() {setFlagsDec(regs.D--); }
+void ins25() {setFlagsDec(regs.H--); }
+void ins35() {uint8_t val=readByte(regs.HL); setFlagsDec(val); writeByte(regs.HL, val--); }
+void ins0D() {setFlagsDec(regs.C--); }
+void ins1D() {setFlagsDec(regs.E--); }
+void ins2D() {setFlagsDec(regs.L--); }
+void ins3D() {setFlagsDec(regs.A--); }
 void ins06() {regs.B = fetchByte(); }
 void ins16() {regs.D = fetchByte(); }
 void ins26() {regs.H = fetchByte(); }
@@ -72,6 +73,87 @@ void ins0E() {regs.C = fetchByte(); }
 void ins1E() {regs.E = fetchByte(); }
 void ins2E() {regs.L = fetchByte(); }
 void ins3E() {regs.A = fetchByte(); }
+void ins07() {} // TODO
+void ins17() {} // TODO
+void ins27() {} // TODO
+void ins37() {} // TODO
+void ins08() {writeWord(fetchWord(), SP); }
+void ins09() { regs.HL+=regs.BC; set_flags('-', 0, 0, 0); }
+void ins19() { regs.HL+=regs.DE; set_flags('-', 0, 0, 0); }
+void ins29() { regs.HL+=regs.HL; set_flags('-', 0, 0, 0); }
+void ins39() { regs.HL+=SP; set_flags('-', 0, 0, 0); }
+void ins0A() { regs.A = readByte(regs.BC); }
+void ins1A() { regs.A = readByte(regs.DE); }
+void ins2A() { regs.A = readByte(regs.HL++); }
+void ins3A() { regs.A = readByte(regs.HL--); }
+void ins0F() {} // TODO
+void ins1F() {} // TODO
+void ins2F() {} // TODO
+void ins3F() {} // TODO
+void ins40() { regs.B = regs.B; }
+void ins41() { regs.B = regs.C; }
+void ins42() { regs.B = regs.D; }
+void ins43() { regs.B = regs.E; }
+void ins44() { regs.B = regs.H; }
+void ins45() { regs.B = regs.L; }
+void ins46() { regs.B = readByte(regs.HL); }
+void ins47() { regs.B = regs.A; }
+void ins50() { regs.D = regs.B; }
+void ins51() { regs.D = regs.C; }
+void ins52() { regs.D = regs.D; }
+void ins53() { regs.D = regs.E; }
+void ins54() { regs.D = regs.H; }
+void ins55() { regs.D = regs.L; }
+void ins56() { regs.D = readByte(regs.HL); }
+void ins57() { regs.D = regs.A; }
+void ins60() { regs.H = regs.B; }
+void ins61() { regs.H = regs.C; }
+void ins62() { regs.H = regs.D; }
+void ins63() { regs.H = regs.E; }
+void ins64() { regs.H = regs.H; }
+void ins65() { regs.H = regs.L; }
+void ins66() { regs.H = readByte(regs.HL); }
+void ins67() { regs.H = regs.A; }
+void ins70() { writeByte(regs.HL, regs.B); }
+void ins71() { writeByte(regs.HL, regs.C); }
+void ins72() { writeByte(regs.HL, regs.D); }
+void ins73() { writeByte(regs.HL, regs.E); }
+void ins74() { writeByte(regs.HL, regs.H); }
+void ins75() { writeByte(regs.HL, regs.L); }
+void ins76() {} // TODO
+void ins77() { writeByte(regs.HL, regs.A); }
+void ins48() { regs.C = regs.B; }
+void ins49() { regs.C = regs.C; }
+void ins4A() { regs.C = regs.D; }
+void ins4B() { regs.C = regs.E; }
+void ins4C() { regs.C = regs.H; }
+void ins4D() { regs.C = regs.L; }
+void ins4E() { regs.C = readByte(regs.HL); }
+void ins4F() { regs.C = regs.A; }
+void ins58() { regs.E = regs.B; }
+void ins59() { regs.E = regs.C; }
+void ins5A() { regs.E = regs.D; }
+void ins5B() { regs.E = regs.E; }
+void ins5C() { regs.E = regs.H; }
+void ins5D() { regs.E = regs.L; }
+void ins5E() { regs.E = readByte(regs.HL); }
+void ins5F() { regs.E = regs.A; }
+void ins68() { regs.L = regs.B; }
+void ins69() { regs.L = regs.C; }
+void ins6A() { regs.L = regs.D; }
+void ins6B() { regs.L = regs.E; }
+void ins6C() { regs.L = regs.H; }
+void ins6D() { regs.L = regs.L; }
+void ins6E() { regs.L = readByte(regs.HL); }
+void ins6F() { regs.L = regs.A; }
+void ins78() { regs.A = regs.B; }
+void ins79() { regs.A = regs.C; }
+void ins7A() { regs.A = regs.D; }
+void ins7B() { regs.A = regs.E; }
+void ins7C() { regs.A = regs.H; }
+void ins7D() { regs.A = regs.L; }
+void ins7E() { regs.A = readByte(regs.HL); }
+void ins7F() { regs.A = regs.A; }
 
 
 void (*instrs[256])(void) = {
