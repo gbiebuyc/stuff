@@ -69,6 +69,7 @@ union {
 int scanlineCycles;
 int frameCycles;
 bool IME;
+#include "cpu.h"
 
 uint8_t *get_operand(int i) {
 	i &= 0x7;
@@ -80,19 +81,6 @@ uint8_t *get_operand(int i) {
 	if (i==5) return &regs.L;
 	if (i==6) return mem + regs.HL;
 	if (i==7) return &regs.A;
-}
-
-uint16_t read16() {
-	uint16_t val = *(uint16_t*)(mem+PC);
-	PC+=2;
-	return val;
-}
-
-void set_flags(char Z, char N, char H, char C) {
-	if (Z==1) regs.F |= 0x80; else if (Z==0) regs.F &= ~0x80;
-	if (N==1) regs.F |= 0x40; else if (N==0) regs.F &= ~0x40;
-	if (H==1) regs.F |= 0x20; else if (H==0) regs.F &= ~0x20;
-	if (C==1) regs.F |= 0x10; else if (C==0) regs.F &= ~0x10;
 }
 
 void rotate(int dir, uint8_t *operand, bool through_carry) {
@@ -218,10 +206,10 @@ int main(int ac, char **av) {
 		uint8_t opcode = mem[PC++];
 		int cycles = cycleTable[opcode];
 		if (opcode==0) {} // NOP
-		else if (opcode==0x01) { regs.BC = read16(); }
-		else if (opcode==0x11) { regs.DE = read16(); }
-		else if (opcode==0x21) { regs.HL = read16(); }
-		else if (opcode==0x31) { SP = read16(); }
+		else if (opcode==0x01) { regs.BC = fetchWord(); }
+		else if (opcode==0x11) { regs.DE = fetchWord(); }
+		else if (opcode==0x21) { regs.HL = fetchWord(); }
+		else if (opcode==0x31) { SP = fetchWord(); }
 		else if (opcode==0x03) { regs.BC++; } // INC
 		else if (opcode==0x13) { regs.DE++; }
 		else if (opcode==0x23) { regs.HL++; }
@@ -257,11 +245,11 @@ int main(int ac, char **av) {
 		else if (opcode==0x28) { int8_t i=mem[PC++]; if (FLAG_Z) {PC+=i; cycles+=4;} } // JR Z
 		else if (opcode==0x30) { int8_t i=mem[PC++]; if (!FLAG_C) {PC+=i; cycles+=4;} } // JR NC
 		else if (opcode==0x38) { int8_t i=mem[PC++]; if (FLAG_C) {PC+=i; cycles+=4;} } // JR C
-		else if (opcode==0xc3) { int addr=read16(); PC=addr; } // JP
-		else if (opcode==0xc2) { int addr=read16(); if (!FLAG_Z) {PC=addr; cycles+=4;} } // JP NZ
-		else if (opcode==0xca) { int addr=read16(); if (FLAG_Z) {PC=addr; cycles+=4;} } // JP Z
-		else if (opcode==0xd2) { int addr=read16(); if (!FLAG_C) {PC=addr; cycles+=4;} } // JP NC
-		else if (opcode==0xda) { int addr=read16(); if (FLAG_C) {PC=addr; cycles+=4;} } // JP C
+		else if (opcode==0xc3) { int addr=fetchWord(); PC=addr; } // JP
+		else if (opcode==0xc2) { int addr=fetchWord(); if (!FLAG_Z) {PC=addr; cycles+=4;} } // JP NZ
+		else if (opcode==0xca) { int addr=fetchWord(); if (FLAG_Z) {PC=addr; cycles+=4;} } // JP Z
+		else if (opcode==0xd2) { int addr=fetchWord(); if (!FLAG_C) {PC=addr; cycles+=4;} } // JP NC
+		else if (opcode==0xda) { int addr=fetchWord(); if (FLAG_C) {PC=addr; cycles+=4;} } // JP C
 		else if (opcode==0xe9) { PC = regs.HL; } // JP HL
 		else if (opcode < 0x40 && (opcode&0x7)==4) { increment(get_operand(opcode>>3)); }
 		else if (opcode < 0x40 && (opcode&0x7)==5) { decrement(get_operand(opcode>>3)); }
@@ -279,11 +267,11 @@ int main(int ac, char **av) {
 		else if (opcode==0x1a) { regs.A = mem[regs.DE]; }
 		else if (opcode==0x2a) { regs.A = mem[regs.HL++]; }
 		else if (opcode==0x3a) { regs.A = mem[regs.HL--]; }
-		else if (opcode==0xcd) { int addr=read16(); push(PC); PC=addr; } // CALL
-		else if (opcode==0xc4) { int addr=read16(); if (!FLAG_Z) {push(PC); PC=addr; cycles+=12;} } // CALL NZ
-		else if (opcode==0xcc) { int addr=read16(); if (FLAG_Z) {push(PC); PC=addr; cycles+=12;} } // CALL Z
-		else if (opcode==0xd4) { int addr=read16(); if (!FLAG_C) {push(PC); PC=addr; cycles+=12;} } // CALL NC
-		else if (opcode==0xdc) { int addr=read16(); if (FLAG_C) {push(PC); PC=addr; cycles+=12;} } // CALL C
+		else if (opcode==0xcd) { int addr=fetchWord(); push(PC); PC=addr; } // CALL
+		else if (opcode==0xc4) { int addr=fetchWord(); if (!FLAG_Z) {push(PC); PC=addr; cycles+=12;} } // CALL NZ
+		else if (opcode==0xcc) { int addr=fetchWord(); if (FLAG_Z) {push(PC); PC=addr; cycles+=12;} } // CALL Z
+		else if (opcode==0xd4) { int addr=fetchWord(); if (!FLAG_C) {push(PC); PC=addr; cycles+=12;} } // CALL NC
+		else if (opcode==0xdc) { int addr=fetchWord(); if (FLAG_C) {push(PC); PC=addr; cycles+=12;} } // CALL C
 		else if (opcode==0xc9) { PC=pop(); } // RET
 		else if (opcode==0xc0) { if (!FLAG_Z) PC=pop(); } // RET NZ
 		else if (opcode==0xc8) { if (FLAG_Z) PC=pop(); } // RET Z
@@ -310,8 +298,8 @@ int main(int ac, char **av) {
 		else if (opcode==0xf6) { or(mem[PC++]); }
 		else if (opcode >= 0xb8 && opcode < 0xc0) { compare(*get_operand(opcode)); } // CP
 		else if (opcode==0xfe) { compare(mem[PC++]); }
-		else if (opcode==0xea) { mem[read16()] = regs.A; } // LD
-		else if (opcode==0xfa) { regs.A = mem[read16()]; }
+		else if (opcode==0xea) { mem[fetchWord()] = regs.A; } // LD
+		else if (opcode==0xfa) { regs.A = mem[fetchWord()]; }
 		else if (opcode==0xf3) { IME = 0; } // DI
 		else if (opcode==0xfb) { IME = 1; } // EI
 		else if (opcode==0x2f) { regs.A = ~regs.A; set_flags('-', 1, 1, '-'); } // CPL
@@ -322,7 +310,7 @@ int main(int ac, char **av) {
 		else if (opcode==0x39) { regs.HL+=SP; set_flags('-', 0, 0, 0); }
 		else {
 			printf("Unknown opcode: %#x at PC=%#x\n", opcode, PC-1);
-			exit(EXIT_FAILURE);
+			// exit(EXIT_FAILURE);
 		}
 
 		mem[0xff00] |= 0xcf; // Joypad
