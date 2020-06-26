@@ -23,11 +23,42 @@ uint16_t fetchWord() {
 	return readWord((PC+=2)-2);
 }
 
-void set_flags(char Z, char N, char H, char C) {
+void setFlags(char Z, char N, char H, char C) {
 	if (Z==1) regs.F |= 0x80; else if (Z==0) regs.F &= ~0x80;
 	if (N==1) regs.F |= 0x40; else if (N==0) regs.F &= ~0x40;
 	if (H==1) regs.F |= 0x20; else if (H==0) regs.F &= ~0x20;
 	if (C==1) regs.F |= 0x10; else if (C==0) regs.F &= ~0x10;
+}
+
+void add(int b) {
+	int a = regs.A;
+	setFlags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
+	regs.A += b;
+}
+
+void compare(int b) {
+	int a = regs.A;
+	setFlags(a==b, 1, ((a&0xf)-(b&0xf))<0, b>a);
+}
+
+void subtract(int b) {
+	compare(b);
+	regs.A -= b;
+}
+
+void and(uint8_t operand) {
+	regs.A &= operand;
+	setFlags(!regs.A, 0, 1, 0);
+}
+
+void xor(uint8_t operand) {
+	regs.A ^= operand;
+	setFlags(!regs.A, 0, 0, 0);
+}
+
+void or(uint8_t operand) {
+	regs.A |= operand;
+	setFlags(!regs.A, 0, 0, 0);
 }
 
 void ins00() {}
@@ -47,7 +78,7 @@ void ins0B() {regs.BC--; }
 void ins1B() {regs.DE--; }
 void ins2B() {regs.HL--; }
 void ins3B() {regs.SP--; }
-void setFlagsInc(uint8_t operand) {set_flags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
+void setFlagsInc(uint8_t operand) {setFlags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
 void ins04() {setFlagsInc(regs.B++); }
 void ins14() {setFlagsInc(regs.D++); }
 void ins24() {setFlagsInc(regs.H++); }
@@ -56,7 +87,7 @@ void ins0C() {setFlagsInc(regs.C++); }
 void ins1C() {setFlagsInc(regs.E++); }
 void ins2C() {setFlagsInc(regs.L++); }
 void ins3C() {setFlagsInc(regs.A++); }
-void setFlagsDec(uint8_t operand) {set_flags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
+void setFlagsDec(uint8_t operand) {setFlags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
 void ins05() {setFlagsDec(regs.B--); }
 void ins15() {setFlagsDec(regs.D--); }
 void ins25() {setFlagsDec(regs.H--); }
@@ -78,10 +109,10 @@ void ins17() {} // TODO
 void ins27() {} // TODO
 void ins37() {} // TODO
 void ins08() {writeWord(fetchWord(), SP); }
-void ins09() { regs.HL+=regs.BC; set_flags('-', 0, 0, 0); }
-void ins19() { regs.HL+=regs.DE; set_flags('-', 0, 0, 0); }
-void ins29() { regs.HL+=regs.HL; set_flags('-', 0, 0, 0); }
-void ins39() { regs.HL+=SP; set_flags('-', 0, 0, 0); }
+void ins09() { regs.HL+=regs.BC; setFlags('-', 0, 0, 0); }
+void ins19() { regs.HL+=regs.DE; setFlags('-', 0, 0, 0); }
+void ins29() { regs.HL+=regs.HL; setFlags('-', 0, 0, 0); }
+void ins39() { regs.HL+=SP; setFlags('-', 0, 0, 0); }
 void ins0A() { regs.A = readByte(regs.BC); }
 void ins1A() { regs.A = readByte(regs.DE); }
 void ins2A() { regs.A = readByte(regs.HL++); }
@@ -154,6 +185,70 @@ void ins7C() { regs.A = regs.H; }
 void ins7D() { regs.A = regs.L; }
 void ins7E() { regs.A = readByte(regs.HL); }
 void ins7F() { regs.A = regs.A; }
+void ins80() { add(regs.B); }
+void ins81() { add(regs.C); }
+void ins82() { add(regs.D); }
+void ins83() { add(regs.E); }
+void ins84() { add(regs.H); }
+void ins85() { add(regs.L); }
+void ins86() { add(readByte(regs.HL)); }
+void ins87() { add(regs.A); }
+void ins90() { subtract(regs.B); }
+void ins91() { subtract(regs.C); }
+void ins92() { subtract(regs.D); }
+void ins93() { subtract(regs.E); }
+void ins94() { subtract(regs.H); }
+void ins95() { subtract(regs.L); }
+void ins96() { subtract(readByte(regs.HL)); }
+void ins97() { subtract(regs.A); }
+void insA0() { and(regs.B); }
+void insA1() { and(regs.C); }
+void insA2() { and(regs.D); }
+void insA3() { and(regs.E); }
+void insA4() { and(regs.H); }
+void insA5() { and(regs.L); }
+void insA6() { and(readByte(regs.HL)); }
+void insA7() { and(regs.A); }
+void insB0() { or(regs.B); }
+void insB1() { or(regs.C); }
+void insB2() { or(regs.D); }
+void insB3() { or(regs.E); }
+void insB4() { or(regs.H); }
+void insB5() { or(regs.L); }
+void insB6() { or(readByte(regs.HL)); }
+void insB7() { or(regs.A); }
+void ins88() {} // TODO
+void ins89() {} // TODO
+void ins8A() {} // TODO
+void ins8B() {} // TODO
+void ins8C() {} // TODO
+void ins8D() {} // TODO
+void ins8E() {} // TODO
+void ins8F() {} // TODO
+void ins98() {} // TODO
+void ins99() {} // TODO
+void ins9A() {} // TODO
+void ins9B() {} // TODO
+void ins9C() {} // TODO
+void ins9D() {} // TODO
+void ins9E() {} // TODO
+void ins9F() {} // TODO
+void insA8() { xor(regs.B); }
+void insA9() { xor(regs.C); }
+void insAA() { xor(regs.D); }
+void insAB() { xor(regs.E); }
+void insAC() { xor(regs.H); }
+void insAD() { xor(regs.L); }
+void insAE() { xor(readByte(regs.HL)); }
+void insAF() { xor(regs.A); }
+void insB8() { compare(regs.B); }
+void insB9() { compare(regs.C); }
+void insBA() { compare(regs.D); }
+void insBB() { compare(regs.E); }
+void insBC() { compare(regs.H); }
+void insBD() { compare(regs.L); }
+void insBE() { compare(readByte(regs.HL)); }
+void insBF() { compare(regs.A); }
 
 
 void (*instrs[256])(void) = {
