@@ -90,22 +90,6 @@ void rotate(int dir, uint8_t *operand, bool through_carry) {
 	set_flags(!*operand, 0, 0, shifted_out);
 }
 
-void add(int b) {
-	int a = regs.A;
-	set_flags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
-	regs.A += b;
-}
-
-void compare(int b) {
-	int a = regs.A;
-	set_flags(a==b, 1, ((a&0xf)-(b&0xf))<0, b>a);
-}
-
-void subtract(int b) {
-	compare(b);
-	regs.A -= b;
-}
-
 void increment(uint8_t *operand) {
 	set_flags(*operand==0xff, 0, (((*operand&0xf)+1)&0x10)==0x10, '-');
 	++*operand;
@@ -125,21 +109,6 @@ uint16_t pop() {
 	uint16_t val = *(uint16_t*)(mem+SP);
 	SP += 2;
 	return val;
-}
-
-void and(uint8_t operand) {
-	regs.A &= operand;
-	set_flags(!regs.A, 0, 1, 0);
-}
-
-void xor(uint8_t operand) {
-	regs.A ^= operand;
-	set_flags(!regs.A, 0, 0, 0);
-}
-
-void or(uint8_t operand) {
-	regs.A |= operand;
-	set_flags(!regs.A, 0, 0, 0);
 }
 
 void swap(uint8_t *operand) {
