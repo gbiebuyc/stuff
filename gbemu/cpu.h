@@ -490,6 +490,134 @@ void cb7C() { testBit(regs.H, 7); }
 void cb7D() { testBit(regs.L, 7); }
 void cb7E() { testBit(readByte(regs.HL), 7); }
 void cb7F() { testBit(regs.A, 7); }
+void cb80() { regs.B &= ~(1<<0); }
+void cb81() { regs.C &= ~(1<<0); }
+void cb82() { regs.D &= ~(1<<0); }
+void cb83() { regs.E &= ~(1<<0); }
+void cb84() { regs.H &= ~(1<<0); }
+void cb85() { regs.L &= ~(1<<0); }
+void cb86() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<0)); }
+void cb87() { regs.A &= ~(1<<0); }
+void cb88() { regs.B &= ~(1<<1); }
+void cb89() { regs.C &= ~(1<<1); }
+void cb8A() { regs.D &= ~(1<<1); }
+void cb8B() { regs.E &= ~(1<<1); }
+void cb8C() { regs.H &= ~(1<<1); }
+void cb8D() { regs.L &= ~(1<<1); }
+void cb8E() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<1)); }
+void cb8F() { regs.A &= ~(1<<1); }
+void cb90() { regs.B &= ~(1<<2); }
+void cb91() { regs.C &= ~(1<<2); }
+void cb92() { regs.D &= ~(1<<2); }
+void cb93() { regs.E &= ~(1<<2); }
+void cb94() { regs.H &= ~(1<<2); }
+void cb95() { regs.L &= ~(1<<2); }
+void cb96() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<2)); }
+void cb97() { regs.A &= ~(1<<2); }
+void cb98() { regs.B &= ~(1<<3); }
+void cb99() { regs.C &= ~(1<<3); }
+void cb9A() { regs.D &= ~(1<<3); }
+void cb9B() { regs.E &= ~(1<<3); }
+void cb9C() { regs.H &= ~(1<<3); }
+void cb9D() { regs.L &= ~(1<<3); }
+void cb9E() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<3)); }
+void cb9F() { regs.A &= ~(1<<3); }
+void cbA0() { regs.B &= ~(1<<4); }
+void cbA1() { regs.C &= ~(1<<4); }
+void cbA2() { regs.D &= ~(1<<4); }
+void cbA3() { regs.E &= ~(1<<4); }
+void cbA4() { regs.H &= ~(1<<4); }
+void cbA5() { regs.L &= ~(1<<4); }
+void cbA6() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<4)); }
+void cbA7() { regs.A &= ~(1<<4); }
+void cbA8() { regs.B &= ~(1<<5); }
+void cbA9() { regs.C &= ~(1<<5); }
+void cbAA() { regs.D &= ~(1<<5); }
+void cbAB() { regs.E &= ~(1<<5); }
+void cbAC() { regs.H &= ~(1<<5); }
+void cbAD() { regs.L &= ~(1<<5); }
+void cbAE() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<5)); }
+void cbAF() { regs.A &= ~(1<<5); }
+void cbB0() { regs.B &= ~(1<<6); }
+void cbB1() { regs.C &= ~(1<<6); }
+void cbB2() { regs.D &= ~(1<<6); }
+void cbB3() { regs.E &= ~(1<<6); }
+void cbB4() { regs.H &= ~(1<<6); }
+void cbB5() { regs.L &= ~(1<<6); }
+void cbB6() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<6)); }
+void cbB7() { regs.A &= ~(1<<6); }
+void cbB8() { regs.B &= ~(1<<7); }
+void cbB9() { regs.C &= ~(1<<7); }
+void cbBA() { regs.D &= ~(1<<7); }
+void cbBB() { regs.E &= ~(1<<7); }
+void cbBC() { regs.H &= ~(1<<7); }
+void cbBD() { regs.L &= ~(1<<7); }
+void cbBE() { writeByte(regs.HL, readByte(regs.HL) & ~(1<<7)); }
+void cbBF() { regs.A &= ~(1<<7); }
+void cbC0() { regs.B |= (1<<0); }
+void cbC1() { regs.C |= (1<<0); }
+void cbC2() { regs.D |= (1<<0); }
+void cbC3() { regs.E |= (1<<0); }
+void cbC4() { regs.H |= (1<<0); }
+void cbC5() { regs.L |= (1<<0); }
+void cbC6() { writeByte(regs.HL, readByte(regs.HL) | (1<<0)); }
+void cbC7() { regs.A |= (1<<0); }
+void cbC8() { regs.B |= (1<<1); }
+void cbC9() { regs.C |= (1<<1); }
+void cbCA() { regs.D |= (1<<1); }
+void cbCB() { regs.E |= (1<<1); }
+void cbCC() { regs.H |= (1<<1); }
+void cbCD() { regs.L |= (1<<1); }
+void cbCE() { writeByte(regs.HL, readByte(regs.HL) | (1<<1)); }
+void cbCF() { regs.A |= (1<<1); }
+void cbD0() { regs.B |= (1<<2); }
+void cbD1() { regs.C |= (1<<2); }
+void cbD2() { regs.D |= (1<<2); }
+void cbD3() { regs.E |= (1<<2); }
+void cbD4() { regs.H |= (1<<2); }
+void cbD5() { regs.L |= (1<<2); }
+void cbD6() { writeByte(regs.HL, readByte(regs.HL) | (1<<2)); }
+void cbD7() { regs.A |= (1<<2); }
+void cbD8() { regs.B |= (1<<3); }
+void cbD9() { regs.C |= (1<<3); }
+void cbDA() { regs.D |= (1<<3); }
+void cbDB() { regs.E |= (1<<3); }
+void cbDC() { regs.H |= (1<<3); }
+void cbDD() { regs.L |= (1<<3); }
+void cbDE() { writeByte(regs.HL, readByte(regs.HL) | (1<<3)); }
+void cbDF() { regs.A |= (1<<3); }
+void cbE0() { regs.B |= (1<<4); }
+void cbE1() { regs.C |= (1<<4); }
+void cbE2() { regs.D |= (1<<4); }
+void cbE3() { regs.E |= (1<<4); }
+void cbE4() { regs.H |= (1<<4); }
+void cbE5() { regs.L |= (1<<4); }
+void cbE6() { writeByte(regs.HL, readByte(regs.HL) | (1<<4)); }
+void cbE7() { regs.A |= (1<<4); }
+void cbE8() { regs.B |= (1<<5); }
+void cbE9() { regs.C |= (1<<5); }
+void cbEA() { regs.D |= (1<<5); }
+void cbEB() { regs.E |= (1<<5); }
+void cbEC() { regs.H |= (1<<5); }
+void cbED() { regs.L |= (1<<5); }
+void cbEE() { writeByte(regs.HL, readByte(regs.HL) | (1<<5)); }
+void cbEF() { regs.A |= (1<<5); }
+void cbF0() { regs.B |= (1<<6); }
+void cbF1() { regs.C |= (1<<6); }
+void cbF2() { regs.D |= (1<<6); }
+void cbF3() { regs.E |= (1<<6); }
+void cbF4() { regs.H |= (1<<6); }
+void cbF5() { regs.L |= (1<<6); }
+void cbF6() { writeByte(regs.HL, readByte(regs.HL) | (1<<6)); }
+void cbF7() { regs.A |= (1<<6); }
+void cbF8() { regs.B |= (1<<7); }
+void cbF9() { regs.C |= (1<<7); }
+void cbFA() { regs.D |= (1<<7); }
+void cbFB() { regs.E |= (1<<7); }
+void cbFC() { regs.H |= (1<<7); }
+void cbFD() { regs.L |= (1<<7); }
+void cbFE() { writeByte(regs.HL, readByte(regs.HL) | (1<<7)); }
+void cbFF() { regs.A |= (1<<7); }
 
 void (*instrs[512])(void) = {
 	ins00, ins01, ins02, ins03, ins04, ins05, ins06, ins07, ins08, ins09, ins0A, ins0B, ins0C, ins0D, ins0E, ins0F,
