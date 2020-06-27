@@ -41,7 +41,7 @@ void compare(int b) {
 	setFlags(a==b, 1, ((a&0xf)-(b&0xf))<0, b>a);
 }
 
-void subtract(int b) {
+void sub(int b) {
 	compare(b);
 	regs.A -= b;
 }
@@ -61,23 +61,31 @@ void or(uint8_t operand) {
 	setFlags(!regs.A, 0, 0, 0);
 }
 
+void push(uint16_t operand) {
+	*(uint16_t*)(mem+(SP-=2)) = operand;
+}
+
+uint16_t pop() {
+	return *(uint16_t*)(mem+(SP+=2)-2);
+}
+
 void ins00() {}
 void ins01() {regs.BC = fetchWord(); }
 void ins11() {regs.DE = fetchWord(); }
 void ins21() {regs.HL = fetchWord(); }
-void ins31() {regs.SP = fetchWord(); }
-void ins02() {writeByte(regs.BC, A); }
-void ins12() {writeByte(regs.DE, A); }
-void ins22() {writeByte(regs.HL++, A); }
-void ins32() {writeByte(regs.HL--, A); }
+void ins31() {SP = fetchWord(); }
+void ins02() {writeByte(regs.BC, regs.A); }
+void ins12() {writeByte(regs.DE, regs.A); }
+void ins22() {writeByte(regs.HL++, regs.A); }
+void ins32() {writeByte(regs.HL--, regs.A); }
 void ins03() {regs.BC++; }
 void ins13() {regs.DE++; }
 void ins23() {regs.HL++; }
-void ins33() {regs.SP++; }
+void ins33() {SP++; }
 void ins0B() {regs.BC--; }
 void ins1B() {regs.DE--; }
 void ins2B() {regs.HL--; }
-void ins3B() {regs.SP--; }
+void ins3B() {SP--; }
 void setFlagsInc(uint8_t operand) {setFlags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
 void ins04() {setFlagsInc(regs.B++); }
 void ins14() {setFlagsInc(regs.D++); }
@@ -193,14 +201,14 @@ void ins84() { add(regs.H); }
 void ins85() { add(regs.L); }
 void ins86() { add(readByte(regs.HL)); }
 void ins87() { add(regs.A); }
-void ins90() { subtract(regs.B); }
-void ins91() { subtract(regs.C); }
-void ins92() { subtract(regs.D); }
-void ins93() { subtract(regs.E); }
-void ins94() { subtract(regs.H); }
-void ins95() { subtract(regs.L); }
-void ins96() { subtract(readByte(regs.HL)); }
-void ins97() { subtract(regs.A); }
+void ins90() { sub(regs.B); }
+void ins91() { sub(regs.C); }
+void ins92() { sub(regs.D); }
+void ins93() { sub(regs.E); }
+void ins94() { sub(regs.H); }
+void ins95() { sub(regs.L); }
+void ins96() { sub(readByte(regs.HL)); }
+void ins97() { sub(regs.A); }
 void insA0() { and(regs.B); }
 void insA1() { and(regs.C); }
 void insA2() { and(regs.D); }
@@ -249,7 +257,62 @@ void insBC() { compare(regs.H); }
 void insBD() { compare(regs.L); }
 void insBE() { compare(readByte(regs.HL)); }
 void insBF() { compare(regs.A); }
-
+void insC6() { add(fetchByte()); }
+void insD6() { sub(fetchByte()); }
+void insE6() { and(fetchByte()); }
+void insF6() { or(fetchByte()); }
+void insCE() {} // TODO
+void insDE() {} // TODO
+void insEE() {} // TODO
+void insFE() {} // TODO
+void insC0() { if (!FLAG_Z) PC=pop(); }
+void insC8() { if (FLAG_Z) PC=pop(); }
+void insD0() { if (!FLAG_C) PC=pop(); }
+void insD8() { if (FLAG_C) PC=pop(); }
+void insC9() { PC=pop(); }
+void insD9() { PC=pop(); IME=1; }
+void insC5() { push(regs.BC); }
+void insD5() { push(regs.DE); }
+void insE5() { push(regs.HL); }
+void insF5() { push(regs.AF); }
+void insC1() { regs.BC=pop(); }
+void insD1() { regs.DE=pop(); }
+void insE1() { regs.HL=pop(); }
+void insF1() { regs.AF=pop(); }
+void ins18() { int8_t i=fetchByte(); PC+=i; }
+void ins20() { int8_t i=fetchByte(); if (!FLAG_Z) {PC+=i; cycles+=4;} }
+void ins28() { int8_t i=fetchByte(); if (FLAG_Z) {PC+=i; cycles+=4;} }
+void ins30() { int8_t i=fetchByte(); if (!FLAG_C) {PC+=i; cycles+=4;} }
+void ins38() { int8_t i=fetchByte(); if (FLAG_C) {PC+=i; cycles+=4;} }
+void insC3() { int addr=fetchWord(); PC=addr; }
+void insC2() { int addr=fetchWord(); if (!FLAG_Z) {PC=addr; cycles+=4;} }
+void insCA() { int addr=fetchWord(); if (FLAG_Z) {PC=addr; cycles+=4;} }
+void insD2() { int addr=fetchWord(); if (!FLAG_C) {PC=addr; cycles+=4;} }
+void insDA() { int addr=fetchWord(); if (FLAG_C) {PC=addr; cycles+=4;} }
+void insCD() { int addr=fetchWord(); push(PC); PC=addr; }
+void insC4() { int addr=fetchWord(); if (!FLAG_Z) {push(PC); PC=addr; cycles+=12;} }
+void insCC() { int addr=fetchWord(); if (FLAG_Z) {push(PC); PC=addr; cycles+=12;} }
+void insD4() { int addr=fetchWord(); if (!FLAG_C) {push(PC); PC=addr; cycles+=12;} }
+void insDC() { int addr=fetchWord(); if (FLAG_C) {push(PC); PC=addr; cycles+=12;} }
+void insE0() { writeByte(0xff00+fetchByte(), regs.A); }
+void insF0() { regs.A = readByte(0xff00+fetchByte()); }
+void insE2() { writeByte(0xff00+regs.C, regs.A); }
+void insF2() { regs.A = readByte(0xff00+regs.C); }
+void insF3() { IME = 0; }
+void insFB() { IME = 1; }
+void insC7() { push(PC); PC=0x00; }
+void insD7() { push(PC); PC=0x10; }
+void insE7() { push(PC); PC=0x20; }
+void insF7() { push(PC); PC=0x30; }
+void insCF() { push(PC); PC=0x08; }
+void insDF() { push(PC); PC=0x18; }
+void insEF() { push(PC); PC=0x28; }
+void insFF() { push(PC); PC=0x38; }
+void insE8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff); SP+=i; }
+void insF8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff); regs.HL=SP+i; }
+void insF9() { SP = regs.HL; }
+void insEA() { writeByte(fetchWord(), regs.A); }
+void insFA() { regs.A = readByte(fetchWord()); }
 
 void (*instrs[256])(void) = {
 	ins00, ins01, ins02, ins03, ins04, ins05, ins06, ins07, ins08, ins09, ins0A, ins0B, ins0C, ins0D, ins0E, ins0F,
@@ -265,7 +328,7 @@ void (*instrs[256])(void) = {
 	insA0, insA1, insA2, insA3, insA4, insA5, insA6, insA7, insA8, insA9, insAA, insAB, insAC, insAD, insAE, insAF,
 	insB0, insB1, insB2, insB3, insB4, insB5, insB6, insB7, insB8, insB9, insBA, insBB, insBC, insBD, insBE, insBF,
 	insC0, insC1, insC2, insC3, insC4, insC5, insC6, insC7, insC8, insC9, insCA, insCB, insCC, insCD, insCE, insCF,
-	insD0, insD1, insD2, insD3, insD4, insD5, insD6, insD7, insD8, insD9, insDA, insDB, insDC, insDD, insDE, insDF,
-	insE0, insE1, insE2, insE3, insE4, insE5, insE6, insE7, insE8, insE9, insEA, insEB, insEC, insED, insEE, insEF,
-	insF0, insF1, insF2, insF3, insF4, insF5, insF6, insF7, insF8, insF9, insFA, insFB, insFC, insFD, insFE, insFF,
+	insD0, insD1, insD2, NULL , insD4, insD5, insD6, insD7, insD8, insD9, insDA, NULL , insDC, NULL , insDE, insDF,
+	insE0, insE1, insE2, NULL , NULL , insE5, insE6, insE7, insE8, insE9, insEA, NULL , NULL , NULL , insEE, insEF,
+	insF0, insF1, insF2, insF3, NULL , insF5, insF6, insF7, insF8, insF9, insFA, insFB, NULL , NULL , insFE, insFF,
 };
