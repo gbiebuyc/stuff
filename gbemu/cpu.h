@@ -81,6 +81,37 @@ uint16_t pop() {
 	return *(uint16_t*)(mem+(SP+=2)-2);
 }
 
+uint8_t rotate(uint8_t operand, char mnemonic[4]) {
+	int shifted_out = (mnemonic[1]=='L') ? operand>>7 : operand&1;
+	int shifted_in = (mnemonic[2]=='C') ? shifted_out : FLAG_C;
+	operand = (mnemonic[1]=='L') ? operand<<1|shifted_in : operand>>1|shifted_in<<7;
+	setFlags((mnemonic[3]=='A') ? 0 : !operand, 0, 0, shifted_out);
+	return operand;
+}
+
+void SLA(uint8_t operand) {
+	setFlags(!(operand<<1), 0, 0, operand>>7);
+	return operand << 1;
+}
+
+void SRA(uint8_t operand) {
+	uint8_t carry = operand&1;
+	operand = (operand>>1) | (operand&0x80);
+	setFlags(!operand, 0, 0, carry);
+	return operand;
+}
+
+void SRL(uint8_t operand) {
+	setFlags(!(operand>>1), 0, 0, operand&1);
+	return operand >> 1;
+}
+
+void swap(uint8_t operand) {
+	operand = (operand>>4) | (operand<<4);
+	setFlags(!operand, 0, 0, 0);
+	return operand;
+}
+
 void ins00() {}
 void ins01() {regs.BC = fetchWord(); }
 void ins11() {regs.DE = fetchWord(); }
@@ -124,10 +155,14 @@ void ins0E() {regs.C = fetchByte(); }
 void ins1E() {regs.E = fetchByte(); }
 void ins2E() {regs.L = fetchByte(); }
 void ins3E() {regs.A = fetchByte(); }
-void ins07() {} // TODO
-void ins17() {} // TODO
+void ins07() { regs.A = rotate(regs.A, "RLCA"); }
+void ins0F() { regs.A = rotate(regs.A, "RRCA"); }
+void ins17() { regs.A = rotate(regs.A, "RL A"); }
+void ins1F() { regs.A = rotate(regs.A, "RR A"); }
 void ins27() {} // TODO
 void ins37() {} // TODO
+void ins2F() {} // TODO
+void ins3F() {} // TODO
 void ins08() {writeWord(fetchWord(), SP); }
 void ins09() { regs.HL+=regs.BC; setFlags('-', 0, 0, 0); }
 void ins19() { regs.HL+=regs.DE; setFlags('-', 0, 0, 0); }
@@ -137,10 +172,6 @@ void ins0A() { regs.A = readByte(regs.BC); }
 void ins1A() { regs.A = readByte(regs.DE); }
 void ins2A() { regs.A = readByte(regs.HL++); }
 void ins3A() { regs.A = readByte(regs.HL--); }
-void ins0F() {} // TODO
-void ins1F() {} // TODO
-void ins2F() {} // TODO
-void ins3F() {} // TODO
 void ins40() { regs.B = regs.B; }
 void ins41() { regs.B = regs.C; }
 void ins42() { regs.B = regs.D; }
@@ -326,8 +357,73 @@ void insF9() { SP = regs.HL; }
 void insEA() { writeByte(fetchWord(), regs.A); }
 void insFA() { regs.A = readByte(fetchWord()); }
 void ins76() { isHalted = true; }
+void insCB();
+void cb00() { regs.B = rotate(regs.B, "RLC "); }
+void cb01() { regs.C = rotate(regs.C, "RLC "); }
+void cb02() { regs.D = rotate(regs.D, "RLC "); }
+void cb03() { regs.E = rotate(regs.E, "RLC "); }
+void cb04() { regs.H = rotate(regs.H, "RLC "); }
+void cb05() { regs.L = rotate(regs.L, "RLC "); }
+void cb06() { writeByte(regs.HL, rotate(readByte(regs.HL), "RLC ")); }
+void cb07() { regs.A = rotate(regs.A, "RRC "); }
+void cb08() { regs.B = rotate(regs.B, "RRC "); }
+void cb09() { regs.C = rotate(regs.C, "RRC "); }
+void cb0A() { regs.D = rotate(regs.D, "RRC "); }
+void cb0B() { regs.E = rotate(regs.E, "RRC "); }
+void cb0C() { regs.H = rotate(regs.H, "RRC "); }
+void cb0D() { regs.L = rotate(regs.L, "RRC "); }
+void cb0E() { writeByte(regs.HL, rotate(readByte(regs.HL), "RRC ")); }
+void cb0F() { regs.A = rotate(regs.A, "RRC "); }
+void cb10() { regs.B = rotate(regs.B, "RL  "); }
+void cb11() { regs.C = rotate(regs.C, "RL  "); }
+void cb12() { regs.D = rotate(regs.D, "RL  "); }
+void cb13() { regs.E = rotate(regs.E, "RL  "); }
+void cb14() { regs.H = rotate(regs.H, "RL  "); }
+void cb15() { regs.L = rotate(regs.L, "RL  "); }
+void cb16() { writeByte(regs.HL, rotate(readByte(regs.HL), "RL  ")); }
+void cb17() { regs.A = rotate(regs.A, "RR  "); }
+void cb18() { regs.B = rotate(regs.B, "RR  "); }
+void cb19() { regs.C = rotate(regs.C, "RR  "); }
+void cb1A() { regs.D = rotate(regs.D, "RR  "); }
+void cb1B() { regs.E = rotate(regs.E, "RR  "); }
+void cb1C() { regs.H = rotate(regs.H, "RR  "); }
+void cb1D() { regs.L = rotate(regs.L, "RR  "); }
+void cb1E() { writeByte(regs.HL, rotate(readByte(regs.HL), "RR  ")); }
+void cb1F() { regs.A = rotate(regs.A, "RR  "); }
+void cb20() { regs.B = SLA(regs.B); }
+void cb21() { regs.C = SLA(regs.C); }
+void cb22() { regs.D = SLA(regs.D); }
+void cb23() { regs.E = SLA(regs.E); }
+void cb24() { regs.H = SLA(regs.H); }
+void cb25() { regs.L = SLA(regs.L); }
+void cb26() { writeByte(regs.HL, SLA(readByte(regs.HL))); }
+void cb27() { regs.A = SLA(regs.A); }
+void cb28() { regs.B = SRA(regs.B); }
+void cb29() { regs.C = SRA(regs.C); }
+void cb2A() { regs.D = SRA(regs.D); }
+void cb2B() { regs.E = SRA(regs.E); }
+void cb2C() { regs.H = SRA(regs.H); }
+void cb2D() { regs.L = SRA(regs.L); }
+void cb2E() { writeByte(regs.HL, SRA(readByte(regs.HL))); }
+void cb2F() { regs.A = SRA(regs.A); }
+void cb20() { regs.B = swap(regs.B); }
+void cb21() { regs.C = swap(regs.C); }
+void cb22() { regs.D = swap(regs.D); }
+void cb23() { regs.E = swap(regs.E); }
+void cb24() { regs.H = swap(regs.H); }
+void cb25() { regs.L = swap(regs.L); }
+void cb26() { writeByte(regs.HL, swap(readByte(regs.HL))); }
+void cb27() { regs.A = swap(regs.A); }
+void cb28() { regs.B = SRL(regs.B); }
+void cb29() { regs.C = SRL(regs.C); }
+void cb2A() { regs.D = SRL(regs.D); }
+void cb2B() { regs.E = SRL(regs.E); }
+void cb2C() { regs.H = SRL(regs.H); }
+void cb2D() { regs.L = SRL(regs.L); }
+void cb2E() { writeByte(regs.HL, SRL(readByte(regs.HL))); }
+void cb2F() { regs.A = SRL(regs.A); }
 
-void (*instrs[256])(void) = {
+void (*instrs[512])(void) = {
 	ins00, ins01, ins02, ins03, ins04, ins05, ins06, ins07, ins08, ins09, ins0A, ins0B, ins0C, ins0D, ins0E, ins0F,
 	ins10, ins11, ins12, ins13, ins14, ins15, ins16, ins17, ins18, ins19, ins1A, ins1B, ins1C, ins1D, ins1E, ins1F,
 	ins20, ins21, ins22, ins23, ins24, ins25, ins26, ins27, ins28, ins29, ins2A, ins2B, ins2C, ins2D, ins2E, ins2F,
@@ -344,4 +440,26 @@ void (*instrs[256])(void) = {
 	insD0, insD1, insD2, NULL , insD4, insD5, insD6, insD7, insD8, insD9, insDA, NULL , insDC, NULL , insDE, insDF,
 	insE0, insE1, insE2, NULL , NULL , insE5, insE6, insE7, insE8, insE9, insEA, NULL , NULL , NULL , insEE, insEF,
 	insF0, insF1, insF2, insF3, NULL , insF5, insF6, insF7, insF8, insF9, insFA, insFB, NULL , NULL , insFE, insFF,
+	cb00, cb01, cb02, cb03, cb04, cb05, cb06, cb07, cb08, cb09, cb0A, cb0B, cb0C, cb0D, cb0E, cb0F,
+	cb10, cb11, cb12, cb13, cb14, cb15, cb16, cb17, cb18, cb19, cb1A, cb1B, cb1C, cb1D, cb1E, cb1F,
+	cb20, cb21, cb22, cb23, cb24, cb25, cb26, cb27, cb28, cb29, cb2A, cb2B, cb2C, cb2D, cb2E, cb2F,
+	cb30, cb31, cb32, cb33, cb34, cb35, cb36, cb37, cb38, cb39, cb3A, cb3B, cb3C, cb3D, cb3E, cb3F,
+	cb40, cb41, cb42, cb43, cb44, cb45, cb46, cb47, cb48, cb49, cb4A, cb4B, cb4C, cb4D, cb4E, cb4F,
+	cb50, cb51, cb52, cb53, cb54, cb55, cb56, cb57, cb58, cb59, cb5A, cb5B, cb5C, cb5D, cb5E, cb5F,
+	cb60, cb61, cb62, cb63, cb64, cb65, cb66, cb67, cb68, cb69, cb6A, cb6B, cb6C, cb6D, cb6E, cb6F,
+	cb70, cb71, cb72, cb73, cb74, cb75, cb76, cb77, cb78, cb79, cb7A, cb7B, cb7C, cb7D, cb7E, cb7F,
+	cb80, cb81, cb82, cb83, cb84, cb85, cb86, cb87, cb88, cb89, cb8A, cb8B, cb8C, cb8D, cb8E, cb8F,
+	cb90, cb91, cb92, cb93, cb94, cb95, cb96, cb97, cb98, cb99, cb9A, cb9B, cb9C, cb9D, cb9E, cb9F,
+	cbA0, cbA1, cbA2, cbA3, cbA4, cbA5, cbA6, cbA7, cbA8, cbA9, cbAA, cbAB, cbAC, cbAD, cbAE, cbAF,
+	cbB0, cbB1, cbB2, cbB3, cbB4, cbB5, cbB6, cbB7, cbB8, cbB9, cbBA, cbBB, cbBC, cbBD, cbBE, cbBF,
+	cbC0, cbC1, cbC2, cbC3, cbC4, cbC5, cbC6, cbC7, cbC8, cbC9, cbCA, cbCB, cbCC, cbCD, cbCE, cbCF,
+	cbD0, cbD1, cbD2, cbD3, cbD4, cbD5, cbD6, cbD7, cbD8, cbD9, cbDA, cbDB, cbDC, cbDD, cbDE, cbDF,
+	cbE0, cbE1, cbE2, cbE3, cbE4, cbE5, cbE6, cbE7, cbE8, cbE9, cbEA, cbEB, cbEC, cbED, cbEE, cbEF,
+	cbF0, cbF1, cbF2, cbF3, cbF4, cbF5, cbF6, cbF7, cbF8, cbF9, cbFA, cbFB, cbFC, cbFD, cbFE, cbFF,
 };
+
+void insCB() {
+	uint8_t op = fetchByte();
+	cycles += ((op&7)==6) ? 16 : 8;
+	instrs[op+256]();
+}
