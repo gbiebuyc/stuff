@@ -89,31 +89,31 @@ uint8_t rotate(uint8_t operand, char mnemonic[4]) {
 	return operand;
 }
 
-void SLA(uint8_t operand) {
+uint8_t SLA(uint8_t operand) {
 	setFlags(!(operand<<1), 0, 0, operand>>7);
 	return operand << 1;
 }
 
-void SRA(uint8_t operand) {
+uint8_t SRA(uint8_t operand) {
 	uint8_t carry = operand&1;
 	operand = (operand>>1) | (operand&0x80);
 	setFlags(!operand, 0, 0, carry);
 	return operand;
 }
 
-void SRL(uint8_t operand) {
+uint8_t SRL(uint8_t operand) {
 	setFlags(!(operand>>1), 0, 0, operand&1);
 	return operand >> 1;
 }
 
-void swap(uint8_t operand) {
+uint8_t swap(uint8_t operand) {
 	operand = (operand>>4) | (operand<<4);
 	setFlags(!operand, 0, 0, 0);
 	return operand;
 }
 
-void testBit(uint8_t operand, int bit) {
-	set_flags(!(operand & (1 << bit)), 0, 1, '-');
+uint8_t testBit(uint8_t operand, int bit) {
+	setFlags(!(operand & (1 << bit)), 0, 1, '-');
 }
 
 void ins00() {}
@@ -206,7 +206,7 @@ void ins72() { writeByte(regs.HL, regs.D); }
 void ins73() { writeByte(regs.HL, regs.E); }
 void ins74() { writeByte(regs.HL, regs.H); }
 void ins75() { writeByte(regs.HL, regs.L); }
-void ins76() {} // TODO
+void ins76() { isHalted = true; }
 void ins77() { writeByte(regs.HL, regs.A); }
 void ins48() { regs.C = regs.B; }
 void ins49() { regs.C = regs.C; }
@@ -360,7 +360,8 @@ void insF8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff
 void insF9() { SP = regs.HL; }
 void insEA() { writeByte(fetchWord(), regs.A); }
 void insFA() { regs.A = readByte(fetchWord()); }
-void ins76() { isHalted = true; }
+void insE9() { PC = readByte(regs.HL); }
+void ins10() { isHalted = true; }
 void insCB();
 void cb00() { regs.B = rotate(regs.B, "RLC "); }
 void cb01() { regs.C = rotate(regs.C, "RLC "); }
