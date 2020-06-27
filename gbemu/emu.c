@@ -95,10 +95,6 @@ void decrement(uint8_t *operand) {
 	--*operand;
 }
 
-void testBit(uint8_t *operand, int bit) {
-	set_flags(!(*operand & (1 << bit)), 0, 1, '-');
-}
-
 
 int main(int ac, char **av) {
 	SDL_Window *window;
