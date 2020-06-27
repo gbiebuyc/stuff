@@ -70,6 +70,9 @@ int scanlineCycles;
 int frameCycles;
 bool IME;
 int cycles;
+bool isBootROMUnmapped = false;
+bool isHalted = false;
+bool debug = false;
 #include "cpu.h"
 
 uint8_t *get_operand(int i) {
@@ -139,19 +142,9 @@ int main(int ac, char **av) {
 	uint8_t *gamerom = malloc(8388608); // max 8 MB cartridges
 	int readSize = fread(gamerom, 1, 999999, fopen(av[1], "rb"));
 	if (readSize>32768)
-		exit(printf("Only supports 32768 byte roms for now."));
+		exit(printf("Only supports 32K roms for now."));
 	printf("read size: %d\n", readSize);
-	memcpy(mem, gamerom, 32768);
-	memcpy(mem, bootrom, sizeof(bootrom));
-	bool isBootROMUnmapped = false;
-	bool debug = false;
 	while (true) {
-		// if (PC >= 0xc)
-		// 	debug = true;
-		if (!isBootROMUnmapped && PC >= 0x100) {
-			memcpy(mem, gamerom, 0x100);
-			isBootROMUnmapped = true;
-		}
 		if (debug) {
 			char flag_str[4];
 			flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
@@ -162,8 +155,13 @@ int main(int ac, char **av) {
 					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, mem[PC]);
 			fflush(stdout);
 		}
-		uint8_t opcode = mem[PC++];
-		cycles = cycleTable[opcode];
+		if (isHalted)
+			cycles = 1;
+		else {
+			uint8_t opcode = fetchByte();
+			cycles = cycleTable[opcode];
+			instrs[opcode]();
+		}
 		if (opcode==0) {} // NOP
 		else if (opcode==0x01) { regs.BC = fetchWord(); }
 		else if (opcode==0x11) { regs.DE = fetchWord(); }

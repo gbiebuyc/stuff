@@ -1,5 +1,12 @@
 uint8_t readByte(uint16_t addr) {
-	return mem[addr];
+	if (addr<0x100 && !isBootROMUnmapped)
+		return bootrom[addr];
+	else if (addr<0x8000)
+		return gamerom[addr];
+	else if (addr>=0x8000)
+		return mem[addr];
+	else
+		printf("warning: read at %#x\n", addr);
 }
 
 uint16_t readWord(uint16_t addr) {
@@ -7,7 +14,12 @@ uint16_t readWord(uint16_t addr) {
 }
 
 void writeByte(uint16_t addr, uint8_t val) {
-	mem[addr] = val;
+	if (addr==0xff50)
+		isBootROMUnmapped = true;
+	else if (addr>=0x8000)
+		mem[addr] = val;
+	else
+		printf("warning: write at %#x\n", addr);
 }
 
 void writeWord(uint16_t addr, uint16_t val) {
@@ -313,6 +325,7 @@ void insF8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff
 void insF9() { SP = regs.HL; }
 void insEA() { writeByte(fetchWord(), regs.A); }
 void insFA() { regs.A = readByte(fetchWord()); }
+void ins76() { isHalted = true; }
 
 void (*instrs[256])(void) = {
 	ins00, ins01, ins02, ins03, ins04, ins05, ins06, ins07, ins08, ins09, ins0A, ins0B, ins0C, ins0D, ins0E, ins0F,
