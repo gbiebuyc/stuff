@@ -71,7 +71,7 @@ bool IME;
 int cycles;
 bool isBootROMUnmapped = false;
 bool isHalted = false;
-bool debug = false;
+bool debug = true;
 #include "cpu.h"
 
 
@@ -98,7 +98,7 @@ int main(int ac, char **av) {
 			flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
 			flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
 			printf("PC=%-4x AF=%-4x BC=%-4x DE=%-4x HL=%-4x SP=%-4x %.4s Opcode=%-2x\n",
-					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, mem[PC]);
+					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, readByte(PC));
 			fflush(stdout);
 		}
 		if (isHalted)

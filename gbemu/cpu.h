@@ -133,7 +133,7 @@ void ins0B() {regs.BC--; }
 void ins1B() {regs.DE--; }
 void ins2B() {regs.HL--; }
 void ins3B() {SP--; }
-void setFlagsInc(uint8_t operand) {setFlags(operand==1, 1, ((((int)operand)&0xf)-1)<0, '-'); }
+void setFlagsInc(uint8_t operand) {setFlags(operand==0xff, 0, (((operand&0xf)+1)&0x10)==0x10, '-'); }
 void ins04() {setFlagsInc(regs.B++); }
 void ins14() {setFlagsInc(regs.D++); }
 void ins24() {setFlagsInc(regs.H++); }
@@ -163,10 +163,10 @@ void ins07() { regs.A = rotate(regs.A, "RLCA"); }
 void ins0F() { regs.A = rotate(regs.A, "RRCA"); }
 void ins17() { regs.A = rotate(regs.A, "RL A"); }
 void ins1F() { regs.A = rotate(regs.A, "RR A"); }
-void ins27() {} // TODO
-void ins37() {} // TODO
-void ins2F() {} // TODO
-void ins3F() {} // TODO
+void ins27() { printf("TODO\n"); } // TODO
+void ins37() { printf("TODO\n"); } // TODO
+void ins2F() { printf("TODO\n"); } // TODO
+void ins3F() { printf("TODO\n"); } // TODO
 void ins08() {writeWord(fetchWord(), SP); }
 void ins09() { regs.HL+=regs.BC; setFlags('-', 0, 0, 0); }
 void ins19() { regs.HL+=regs.DE; setFlags('-', 0, 0, 0); }
@@ -272,22 +272,22 @@ void insB4() { or(regs.H); }
 void insB5() { or(regs.L); }
 void insB6() { or(readByte(regs.HL)); }
 void insB7() { or(regs.A); }
-void ins88() {} // TODO
-void ins89() {} // TODO
-void ins8A() {} // TODO
-void ins8B() {} // TODO
-void ins8C() {} // TODO
-void ins8D() {} // TODO
-void ins8E() {} // TODO
-void ins8F() {} // TODO
-void ins98() {} // TODO
-void ins99() {} // TODO
-void ins9A() {} // TODO
-void ins9B() {} // TODO
-void ins9C() {} // TODO
-void ins9D() {} // TODO
-void ins9E() {} // TODO
-void ins9F() {} // TODO
+void ins88() { printf("TODO\n"); } // TODO
+void ins89() { printf("TODO\n"); } // TODO
+void ins8A() { printf("TODO\n"); } // TODO
+void ins8B() { printf("TODO\n"); } // TODO
+void ins8C() { printf("TODO\n"); } // TODO
+void ins8D() { printf("TODO\n"); } // TODO
+void ins8E() { printf("TODO\n"); } // TODO
+void ins8F() { printf("TODO\n"); } // TODO
+void ins98() { printf("TODO\n"); } // TODO
+void ins99() { printf("TODO\n"); } // TODO
+void ins9A() { printf("TODO\n"); } // TODO
+void ins9B() { printf("TODO\n"); } // TODO
+void ins9C() { printf("TODO\n"); } // TODO
+void ins9D() { printf("TODO\n"); } // TODO
+void ins9E() { printf("TODO\n"); } // TODO
+void ins9F() { printf("TODO\n"); } // TODO
 void insA8() { xor(regs.B); }
 void insA9() { xor(regs.C); }
 void insAA() { xor(regs.D); }
@@ -308,10 +308,10 @@ void insC6() { add(fetchByte()); }
 void insD6() { sub(fetchByte()); }
 void insE6() { and(fetchByte()); }
 void insF6() { or(fetchByte()); }
-void insCE() {} // TODO
-void insDE() {} // TODO
-void insEE() {} // TODO
-void insFE() {} // TODO
+void insCE() { printf("TODO\n"); } // TODO
+void insDE() { printf("TODO\n"); } // TODO
+void insEE() { xor(fetchByte()); }
+void insFE() { compare(fetchByte()); }
 void insC0() { if (!FLAG_Z) PC=pop(); }
 void insC8() { if (FLAG_Z) PC=pop(); }
 void insD0() { if (!FLAG_C) PC=pop(); }
