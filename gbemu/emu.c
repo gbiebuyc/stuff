@@ -69,6 +69,7 @@ union {
 int scanlineCycles;
 int frameCycles;
 bool IME;
+int cycles;
 #include "cpu.h"
 
 uint8_t *get_operand(int i) {
@@ -98,17 +99,6 @@ void increment(uint8_t *operand) {
 void decrement(uint8_t *operand) {
 	set_flags(*operand==1, 1, ((((int)*operand)&0xf)-1)<0, '-');
 	--*operand;
-}
-
-void push(uint16_t operand) {
-	SP -= 2;
-	*(uint16_t*)(mem+SP) = operand;
-}
-
-uint16_t pop() {
-	uint16_t val = *(uint16_t*)(mem+SP);
-	SP += 2;
-	return val;
 }
 
 void swap(uint8_t *operand) {
@@ -173,7 +163,7 @@ int main(int ac, char **av) {
 			fflush(stdout);
 		}
 		uint8_t opcode = mem[PC++];
-		int cycles = cycleTable[opcode];
+		cycles = cycleTable[opcode];
 		if (opcode==0) {} // NOP
 		else if (opcode==0x01) { regs.BC = fetchWord(); }
 		else if (opcode==0x11) { regs.DE = fetchWord(); }
