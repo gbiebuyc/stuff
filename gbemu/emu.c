@@ -11,8 +11,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
-#define ROT_LEFT 0
-#define ROT_RIGHT 1
 #define FLAG_Z (regs.F>>7&1)
 #define FLAG_N (regs.F>>6&1)
 #define FLAG_H (regs.F>>5&1)
@@ -87,13 +85,6 @@ uint8_t *get_operand(int i) {
 	if (i==7) return &regs.A;
 }
 
-void rotate(int dir, uint8_t *operand, bool through_carry) {
-	int shifted_out = (dir==ROT_LEFT) ? *operand>>7 : *operand&1;
-	int shifted_in = through_carry ? FLAG_C : shifted_out;
-	*operand = (dir==ROT_LEFT) ? *operand<<1|shifted_in : *operand>>1|shifted_in<<7;
-	set_flags(!*operand, 0, 0, shifted_out);
-}
-
 void increment(uint8_t *operand) {
 	set_flags(*operand==0xff, 0, (((*operand&0xf)+1)&0x10)==0x10, '-');
 	++*operand;
@@ -104,28 +95,8 @@ void decrement(uint8_t *operand) {
 	--*operand;
 }
 
-void swap(uint8_t *operand) {
-	*operand = ((*operand)>>4) | ((*operand)<<4);
-	set_flags(!*operand, 0, 0, 0);
-}
-
 void testBit(uint8_t *operand, int bit) {
 	set_flags(!(*operand & (1 << bit)), 0, 1, '-');
-}
-
-void SLA(uint8_t *operand) {
-	set_flags(!(*operand<<1), 0, 0, *operand>>7);
-	*operand <<= 1;
-}
-
-void SRA(uint8_t *operand) {
-	set_flags(!(*operand>>1), 0, 0, (*operand)&1);
-	*operand = (*operand>>1) | ((*operand)&0x80);
-}
-
-void SRL(uint8_t *operand) {
-	set_flags(!(*operand>>1), 0, 0, (*operand)&1);
-	*operand >>= 1;
 }
 
 
