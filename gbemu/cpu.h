@@ -276,22 +276,22 @@ void insB4() { or(regs.H); }
 void insB5() { or(regs.L); }
 void insB6() { or(readByte(regs.HL)); }
 void insB7() { or(regs.A); }
-void ins88() { printf("%s not implemented\n", __func__); } // TODO
-void ins89() { printf("%s not implemented\n", __func__); } // TODO
-void ins8A() { printf("%s not implemented\n", __func__); } // TODO
-void ins8B() { printf("%s not implemented\n", __func__); } // TODO
-void ins8C() { printf("%s not implemented\n", __func__); } // TODO
-void ins8D() { printf("%s not implemented\n", __func__); } // TODO
-void ins8E() { printf("%s not implemented\n", __func__); } // TODO
-void ins8F() { printf("%s not implemented\n", __func__); } // TODO
-void ins98() { printf("%s not implemented\n", __func__); } // TODO
-void ins99() { printf("%s not implemented\n", __func__); } // TODO
-void ins9A() { printf("%s not implemented\n", __func__); } // TODO
-void ins9B() { printf("%s not implemented\n", __func__); } // TODO
-void ins9C() { printf("%s not implemented\n", __func__); } // TODO
-void ins9D() { printf("%s not implemented\n", __func__); } // TODO
-void ins9E() { printf("%s not implemented\n", __func__); } // TODO
-void ins9F() { printf("%s not implemented\n", __func__); } // TODO
+void ins88() { add(regs.B + FLAG_C); }
+void ins89() { add(regs.C + FLAG_C); }
+void ins8A() { add(regs.D + FLAG_C); }
+void ins8B() { add(regs.E + FLAG_C); }
+void ins8C() { add(regs.H + FLAG_C); }
+void ins8D() { add(regs.L + FLAG_C); }
+void ins8E() { add(readByte(regs.HL) + FLAG_C); }
+void ins8F() { add(regs.A + FLAG_C); }
+void ins98() { sub(regs.B - FLAG_C); }
+void ins99() { sub(regs.C - FLAG_C); }
+void ins9A() { sub(regs.D - FLAG_C); }
+void ins9B() { sub(regs.E - FLAG_C); }
+void ins9C() { sub(regs.H - FLAG_C); }
+void ins9D() { sub(regs.L - FLAG_C); }
+void ins9E() { sub(readByte(regs.HL) - FLAG_C); }
+void ins9F() { sub(regs.A - FLAG_C); }
 void insA8() { xor(regs.B); }
 void insA9() { xor(regs.C); }
 void insAA() { xor(regs.D); }
@@ -312,8 +312,8 @@ void insC6() { add(fetchByte()); }
 void insD6() { sub(fetchByte()); }
 void insE6() { and(fetchByte()); }
 void insF6() { or(fetchByte()); }
-void insCE() { printf("%s not implemented\n", __func__); } // TODO
-void insDE() { printf("%s not implemented\n", __func__); } // TODO
+void insCE() { add(fetchByte() + FLAG_C); }
+void insDE() { sub(fetchByte() - FLAG_C); }
 void insEE() { xor(fetchByte()); }
 void insFE() { compare(fetchByte()); }
 void insC0() { if (!FLAG_Z) PC=pop(); }
