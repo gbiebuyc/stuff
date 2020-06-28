@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 uint8_t readByte(uint16_t addr) {
 	if (addr<0x100 && !isBootROMUnmapped)
 		return bootrom[addr];
@@ -16,6 +18,8 @@ uint16_t readWord(uint16_t addr) {
 void writeByte(uint16_t addr, uint8_t val) {
 	if (addr==0xff50)
 		isBootROMUnmapped = true;
+	else if (addr==0xff02 && val==0x81) // Serial Data Transfer (Link Cable)
+		write(STDOUT_FILENO, mem+0xff01, 1);
 	else if (addr>=0x8000)
 		mem[addr] = val;
 	else
@@ -163,10 +167,10 @@ void ins07() { regs.A = rotate(regs.A, "RLCA"); }
 void ins0F() { regs.A = rotate(regs.A, "RRCA"); }
 void ins17() { regs.A = rotate(regs.A, "RL A"); }
 void ins1F() { regs.A = rotate(regs.A, "RR A"); }
-void ins27() { printf("TODO\n"); } // TODO
-void ins37() { printf("TODO\n"); } // TODO
-void ins2F() { printf("TODO\n"); } // TODO
-void ins3F() { printf("TODO\n"); } // TODO
+void ins27() { printf("%s not implemented\n", __func__); } // TODO
+void ins37() { setFlags('-', 0, 0, 1); }
+void ins2F() { regs.A = ~regs.A; setFlags('-', 1, 1, '-'); }
+void ins3F() { setFlags('-', 0, 0, FLAG_C ? 0 : 1); }
 void ins08() {writeWord(fetchWord(), SP); }
 void ins09() { regs.HL+=regs.BC; setFlags('-', 0, 0, 0); }
 void ins19() { regs.HL+=regs.DE; setFlags('-', 0, 0, 0); }
@@ -272,22 +276,22 @@ void insB4() { or(regs.H); }
 void insB5() { or(regs.L); }
 void insB6() { or(readByte(regs.HL)); }
 void insB7() { or(regs.A); }
-void ins88() { printf("TODO\n"); } // TODO
-void ins89() { printf("TODO\n"); } // TODO
-void ins8A() { printf("TODO\n"); } // TODO
-void ins8B() { printf("TODO\n"); } // TODO
-void ins8C() { printf("TODO\n"); } // TODO
-void ins8D() { printf("TODO\n"); } // TODO
-void ins8E() { printf("TODO\n"); } // TODO
-void ins8F() { printf("TODO\n"); } // TODO
-void ins98() { printf("TODO\n"); } // TODO
-void ins99() { printf("TODO\n"); } // TODO
-void ins9A() { printf("TODO\n"); } // TODO
-void ins9B() { printf("TODO\n"); } // TODO
-void ins9C() { printf("TODO\n"); } // TODO
-void ins9D() { printf("TODO\n"); } // TODO
-void ins9E() { printf("TODO\n"); } // TODO
-void ins9F() { printf("TODO\n"); } // TODO
+void ins88() { printf("%s not implemented\n", __func__); } // TODO
+void ins89() { printf("%s not implemented\n", __func__); } // TODO
+void ins8A() { printf("%s not implemented\n", __func__); } // TODO
+void ins8B() { printf("%s not implemented\n", __func__); } // TODO
+void ins8C() { printf("%s not implemented\n", __func__); } // TODO
+void ins8D() { printf("%s not implemented\n", __func__); } // TODO
+void ins8E() { printf("%s not implemented\n", __func__); } // TODO
+void ins8F() { printf("%s not implemented\n", __func__); } // TODO
+void ins98() { printf("%s not implemented\n", __func__); } // TODO
+void ins99() { printf("%s not implemented\n", __func__); } // TODO
+void ins9A() { printf("%s not implemented\n", __func__); } // TODO
+void ins9B() { printf("%s not implemented\n", __func__); } // TODO
+void ins9C() { printf("%s not implemented\n", __func__); } // TODO
+void ins9D() { printf("%s not implemented\n", __func__); } // TODO
+void ins9E() { printf("%s not implemented\n", __func__); } // TODO
+void ins9F() { printf("%s not implemented\n", __func__); } // TODO
 void insA8() { xor(regs.B); }
 void insA9() { xor(regs.C); }
 void insAA() { xor(regs.D); }
@@ -308,8 +312,8 @@ void insC6() { add(fetchByte()); }
 void insD6() { sub(fetchByte()); }
 void insE6() { and(fetchByte()); }
 void insF6() { or(fetchByte()); }
-void insCE() { printf("TODO\n"); } // TODO
-void insDE() { printf("TODO\n"); } // TODO
+void insCE() { printf("%s not implemented\n", __func__); } // TODO
+void insDE() { printf("%s not implemented\n", __func__); } // TODO
 void insEE() { xor(fetchByte()); }
 void insFE() { compare(fetchByte()); }
 void insC0() { if (!FLAG_Z) PC=pop(); }
@@ -360,7 +364,7 @@ void insF8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff
 void insF9() { SP = regs.HL; }
 void insEA() { writeByte(fetchWord(), regs.A); }
 void insFA() { regs.A = readByte(fetchWord()); }
-void insE9() { PC = readByte(regs.HL); }
+void insE9() { PC = readWord(regs.HL); }
 void ins10() { isHalted = true; }
 void insCB();
 void cb00() { regs.B = rotate(regs.B, "RLC "); }
