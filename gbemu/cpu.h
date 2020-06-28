@@ -3,9 +3,9 @@
 uint8_t readByte(uint16_t addr) {
 	if (addr<0x100 && !isBootROMUnmapped)
 		return bootrom[addr];
-	else if (addr<0x4000)
+	else if (addr<0x4000) // ROM bank 00
 		return gamerom[addr];
-	else if (addr>=0x4000 && addr<0x8000)
+	else if (addr<0x8000) // ROM Bank 01~NN
 		return gamerom[addr-0x4000 + 0x4000*selectedROMBank];
 	else if (addr>=0x8000)
 		return mem[addr];
