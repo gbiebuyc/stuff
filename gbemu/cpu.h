@@ -176,7 +176,7 @@ void ins07() { regs.A = rotate(regs.A, "RLCA"); }
 void ins0F() { regs.A = rotate(regs.A, "RRCA"); }
 void ins17() { regs.A = rotate(regs.A, "RL A"); }
 void ins1F() { regs.A = rotate(regs.A, "RR A"); }
-void ins27() { printf("%s not implemented\n", __func__); } // TODO
+void ins27() {} // TODO
 void ins37() { setFlags('-', 0, 0, 1); }
 void ins2F() { regs.A = ~regs.A; setFlags('-', 1, 1, '-'); }
 void ins3F() { setFlags('-', 0, 0, FLAG_C ? 0 : 1); }
