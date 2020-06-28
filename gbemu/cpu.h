@@ -364,7 +364,7 @@ void insF8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff
 void insF9() { SP = regs.HL; }
 void insEA() { writeByte(fetchWord(), regs.A); }
 void insFA() { regs.A = readByte(fetchWord()); }
-void insE9() { PC = readWord(regs.HL); }
+void insE9() { PC = regs.HL; }
 void ins10() { isHalted = true; }
 void insCB();
 void cb00() { regs.B = rotate(regs.B, "RLC "); }
