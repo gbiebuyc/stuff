@@ -71,7 +71,7 @@ bool IME;
 int cycles;
 bool isBootROMUnmapped = false;
 bool isHalted = false;
-bool debug = true;
+bool debug = false;
 #include "cpu.h"
 
 
@@ -91,6 +91,8 @@ int main(int ac, char **av) {
 		exit(printf("Only supports 32K roms for now."));
 	printf("read size: %d\n", readSize);
 	while (true) {
+		// if (!debug && PC==0x100)
+		// 	debug = true;
 		if (debug) {
 			char flag_str[4];
 			flag_str[0] = (regs.F & 0x80) ? 'Z' : '-';
