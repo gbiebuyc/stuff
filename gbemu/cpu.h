@@ -150,7 +150,7 @@ void setFlagsInc(uint8_t operand) {setFlags(operand==0xff, 0, (((operand&0xf)+1)
 void ins04() {setFlagsInc(regs.B++); }
 void ins14() {setFlagsInc(regs.D++); }
 void ins24() {setFlagsInc(regs.H++); }
-void ins34() {uint8_t val=readByte(regs.HL); setFlagsInc(val); writeByte(regs.HL, val++); }
+void ins34() {uint8_t val=readByte(regs.HL); setFlagsInc(val); writeByte(regs.HL, val+1); }
 void ins0C() {setFlagsInc(regs.C++); }
 void ins1C() {setFlagsInc(regs.E++); }
 void ins2C() {setFlagsInc(regs.L++); }
@@ -159,7 +159,7 @@ void setFlagsDec(uint8_t operand) {setFlags(operand==1, 1, ((((int)operand)&0xf)
 void ins05() {setFlagsDec(regs.B--); }
 void ins15() {setFlagsDec(regs.D--); }
 void ins25() {setFlagsDec(regs.H--); }
-void ins35() {uint8_t val=readByte(regs.HL); setFlagsDec(val); writeByte(regs.HL, val--); }
+void ins35() {uint8_t val=readByte(regs.HL); setFlagsDec(val); writeByte(regs.HL, val-1); }
 void ins0D() {setFlagsDec(regs.C--); }
 void ins1D() {setFlagsDec(regs.E--); }
 void ins2D() {setFlagsDec(regs.L--); }
