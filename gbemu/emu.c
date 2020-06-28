@@ -72,6 +72,7 @@ int cycles;
 bool isBootROMUnmapped = false;
 bool isHalted = false;
 bool debug = false;
+int selectedROMBank = 1;
 #include "cpu.h"
 
 
