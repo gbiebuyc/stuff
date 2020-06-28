@@ -3,8 +3,10 @@
 uint8_t readByte(uint16_t addr) {
 	if (addr<0x100 && !isBootROMUnmapped)
 		return bootrom[addr];
-	else if (addr<0x8000)
+	else if (addr<0x4000)
 		return gamerom[addr];
+	else if (addr>=0x4000 && addr<0x8000)
+		return gamerom[addr-0x4000 + 0x4000*selectedROMBank];
 	else if (addr>=0x8000)
 		return mem[addr];
 	else
@@ -20,6 +22,8 @@ void writeByte(uint16_t addr, uint8_t val) {
 		isBootROMUnmapped = true;
 	else if (addr==0xff02 && val==0x81) // Serial Data Transfer (Link Cable)
 		write(STDOUT_FILENO, mem+0xff01, 1);
+	else if (addr>=0x2000 && addr<0x4000)
+		selectedROMBank = val & 0x1f;
 	else if (addr>=0x8000)
 		mem[addr] = val;
 	else
