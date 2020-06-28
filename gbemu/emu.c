@@ -89,7 +89,7 @@ int main(int ac, char **av) {
 	int readSize = fread(gamerom, 1, 999999, fopen(av[1], "rb"));
 	if (readSize>32768)
 		exit(printf("Only supports 32K roms for now."));
-	printf("read size: %d\n", readSize);
+	// printf("read size: %d\n", readSize);
 	while (true) {
 		// if (!debug && PC==0x100)
 		// 	debug = true;
@@ -158,9 +158,9 @@ int main(int ac, char **av) {
 					exit(0);
 				if (e.type == SDL_KEYDOWN) {
 					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-						printf("0xffff ie: %x\n", mem[0xffff]);
-						printf("0xff40 lcdc: %x\n", mem[0xff40]);
-						printf("0xff47 palette: %x\n", mem[0xff47]);
+						// printf("0xffff ie: %x\n", mem[0xffff]);
+						// printf("0xff40 lcdc: %x\n", mem[0xff40]);
+						// printf("0xff47 palette: %x\n", mem[0xff47]);
 						exit(0);
 					}
 				}
