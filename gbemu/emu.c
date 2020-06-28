@@ -87,10 +87,11 @@ int main(int ac, char **av) {
 	surface = SDL_GetWindowSurface(window);
 	mem = malloc(0x10000);
 	gamerom = malloc(8388608); // max 8 MB cartridges
-	int readSize = fread(gamerom, 1, 999999, fopen(av[1], "rb"));
-	if (readSize>32768)
-		exit(printf("Only supports 32K roms for now."));
-	// printf("read size: %d\n", readSize);
+	FILE *f = fopen(av[1], "rb");
+	if (!f) exit(printf("fopen error\n"));
+	int i = 0;
+	while (fread(gamerom+i, 1, 0x100, f) == 0x100)
+		i += 0x100;
 	while (true) {
 		// if (!debug && PC==0x100)
 		// 	debug = true;
