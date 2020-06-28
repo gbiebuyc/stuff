@@ -108,6 +108,8 @@ int main(int ac, char **av) {
 		else {
 			uint8_t opcode = fetchByte();
 			cycles = cycleTable[opcode];
+			if (!instrs[opcode])
+				exit(printf("Invalid opcode: %#x\n", opcode));
 			instrs[opcode]();
 		}
 
