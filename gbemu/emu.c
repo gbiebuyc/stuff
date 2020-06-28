@@ -88,7 +88,7 @@ int main(int ac, char **av) {
 	mem = malloc(0x10000);
 	gamerom = malloc(8388608); // max 8 MB cartridges
 	FILE *f = fopen(av[1], "rb");
-	if (!f) exit(printf("fopen error\n"));
+	if (!f) exit(printf("fopen error: %s\n", av[1]));
 	int i = 0;
 	while (fread(gamerom+i, 1, 0x100, f) == 0x100)
 		i += 0x100;
