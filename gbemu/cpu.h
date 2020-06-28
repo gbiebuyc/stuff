@@ -124,6 +124,11 @@ uint8_t testBit(uint8_t operand, int bit) {
 	setFlags(!(operand & (1 << bit)), 0, 1, '-');
 }
 
+uint16_t addHL(uint16_t n) {
+	setFlags('-', 0, ((regs.HL&0xfff)+(n&0xfff))>0xfff, (((uint32_t)regs.HL)+n)>0xffff);
+	regs.HL += n;
+}
+
 void ins00() {}
 void ins01() {regs.BC = fetchWord(); }
 void ins11() {regs.DE = fetchWord(); }
@@ -176,10 +181,10 @@ void ins37() { setFlags('-', 0, 0, 1); }
 void ins2F() { regs.A = ~regs.A; setFlags('-', 1, 1, '-'); }
 void ins3F() { setFlags('-', 0, 0, FLAG_C ? 0 : 1); }
 void ins08() {writeWord(fetchWord(), SP); }
-void ins09() { regs.HL+=regs.BC; setFlags('-', 0, 0, 0); }
-void ins19() { regs.HL+=regs.DE; setFlags('-', 0, 0, 0); }
-void ins29() { regs.HL+=regs.HL; setFlags('-', 0, 0, 0); }
-void ins39() { regs.HL+=SP; setFlags('-', 0, 0, 0); }
+void ins09() { addHL(regs.BC); }
+void ins19() { addHL(regs.DE); }
+void ins29() { addHL(regs.HL); }
+void ins39() { addHL(SP); }
 void ins0A() { regs.A = readByte(regs.BC); }
 void ins1A() { regs.A = readByte(regs.DE); }
 void ins2A() { regs.A = readByte(regs.HL++); }
