@@ -56,8 +56,15 @@ void setFlags(char Z, char N, char H, char C) {
 
 void add(int b) {
 	int a = regs.A;
-	setFlags(!((a+b)&0xff), 0, (((a&0xf)+(b&0xf))&0x10)==0x10, (a+b)>0xff);
+	setFlags(!((a+b)&0xff), 0, ((a&0xf)+(b&0xf))>0xf, (a+b)>0xff);
 	regs.A += b;
+}
+
+void addc(int b) {
+	int a = regs.A;
+	int c = FLAG_C;
+	setFlags(!((a+b+c)&0xff), 0, ((a&0xf)+(b&0xf)+c)>0xf, (a+b+c)>0xff);
+	regs.A += b + c;
 }
 
 void compare(int b) {
@@ -68,6 +75,13 @@ void compare(int b) {
 void sub(int b) {
 	compare(b);
 	regs.A -= b;
+}
+
+void subc(int b) {
+	int a = regs.A;
+	int c = FLAG_C;
+	setFlags(!((a-b-c)&0xff), 1, ((a&0xf)-(b&0xf)-c)<0, (a-b-c)<0);
+	regs.A = regs.A - b - c;
 }
 
 void and(uint8_t operand) {
@@ -289,22 +303,22 @@ void insB4() { or(regs.H); }
 void insB5() { or(regs.L); }
 void insB6() { or(readByte(regs.HL)); }
 void insB7() { or(regs.A); }
-void ins88() { add(regs.B + FLAG_C); }
-void ins89() { add(regs.C + FLAG_C); }
-void ins8A() { add(regs.D + FLAG_C); }
-void ins8B() { add(regs.E + FLAG_C); }
-void ins8C() { add(regs.H + FLAG_C); }
-void ins8D() { add(regs.L + FLAG_C); }
-void ins8E() { add(readByte(regs.HL) + FLAG_C); }
-void ins8F() { add(regs.A + FLAG_C); }
-void ins98() { sub(regs.B - FLAG_C); }
-void ins99() { sub(regs.C - FLAG_C); }
-void ins9A() { sub(regs.D - FLAG_C); }
-void ins9B() { sub(regs.E - FLAG_C); }
-void ins9C() { sub(regs.H - FLAG_C); }
-void ins9D() { sub(regs.L - FLAG_C); }
-void ins9E() { sub(readByte(regs.HL) - FLAG_C); }
-void ins9F() { sub(regs.A - FLAG_C); }
+void ins88() { addc(regs.B); }
+void ins89() { addc(regs.C); }
+void ins8A() { addc(regs.D); }
+void ins8B() { addc(regs.E); }
+void ins8C() { addc(regs.H); }
+void ins8D() { addc(regs.L); }
+void ins8E() { addc(readByte(regs.HL)); }
+void ins8F() { addc(regs.A); }
+void ins98() { subc(regs.B); }
+void ins99() { subc(regs.C); }
+void ins9A() { subc(regs.D); }
+void ins9B() { subc(regs.E); }
+void ins9C() { subc(regs.H); }
+void ins9D() { subc(regs.L); }
+void ins9E() { subc(readByte(regs.HL)); }
+void ins9F() { subc(regs.A); }
 void insA8() { xor(regs.B); }
 void insA9() { xor(regs.C); }
 void insAA() { xor(regs.D); }
@@ -325,8 +339,8 @@ void insC6() { add(fetchByte()); }
 void insD6() { sub(fetchByte()); }
 void insE6() { and(fetchByte()); }
 void insF6() { or(fetchByte()); }
-void insCE() { add(fetchByte() + FLAG_C); }
-void insDE() { sub(fetchByte() - FLAG_C); }
+void insCE() { addc(fetchByte()); }
+void insDE() { subc(fetchByte()); }
 void insEE() { xor(fetchByte()); }
 void insFE() { compare(fetchByte()); }
 void insC0() { if (!FLAG_Z) PC=pop(); }
