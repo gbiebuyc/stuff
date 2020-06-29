@@ -195,7 +195,7 @@ int main(int ac, char **av) {
 					uint16_t pixels = ((uint16_t*)tile)[v];
 					uint32_t px = pixels >> (7-u);
 					px = (px>>7&2) | (px&1);
-					px = palette[(mem[0xff47]>>(px<<1))&3];
+					px = palette[(mem[0xff47]>>(px*2))&3];
 					((uint32_t*)surface->pixels)[sy*160 + sx] = px;
 				}
 				for (int i=0; i<40; i++) {
@@ -212,7 +212,7 @@ int main(int ac, char **av) {
 						int u = sx - spriteX;
 						uint32_t px = pixels >> (7-u);
 						px = (px>>7&2) | (px&1);
-						px = palette[(spritePalette>>(px<<1))&3];
+						px = palette[(spritePalette>>(px*2))&3];
 						((uint32_t*)surface->pixels)[sy*160 + sx] = px;
 					}
 				}
