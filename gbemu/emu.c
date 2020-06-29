@@ -77,13 +77,8 @@ bool debug = false;
 int selectedROMBank = 1;
 #include "cpu.h"
 
-int	min(int a, int b) {
-	return ((a < b) ? a : b);
-}
-
-int	max(int a, int b) {
-	return ((a > b) ? a : b);
-}
+int min(int a, int b) { return ((a < b) ? a : b); }
+int max(int a, int b) { return ((a > b) ? a : b); }
 
 
 int main(int ac, char **av) {
@@ -177,8 +172,7 @@ int main(int ac, char **av) {
 			}
 		}
 
-		frameCycles += cycles;
-		if (frameCycles >= 70224) {
+		if ((frameCycles += cycles) >= 70224) {
 			frameCycles -= 70224;
 			SDL_Event e;
 			while (SDL_PollEvent(&e)) {
