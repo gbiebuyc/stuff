@@ -203,7 +203,7 @@ int main(int ac, char **av) {
 					int v = y&7;
 					int tileIndex = BGTileMap[tileY*32 + tileX];
 					if (!(mem[0xff40]&0x10))
-						tileIndex += 128;
+						tileIndex = (int8_t)tileIndex + 128;
 					uint8_t *tile = tileData + tileIndex*16;
 					uint16_t pixels = ((uint16_t*)tile)[v];
 					uint32_t px = pixels >> (7-u);
