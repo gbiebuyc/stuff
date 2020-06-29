@@ -22,6 +22,8 @@ void writeByte(uint16_t addr, uint8_t val) {
 		isBootROMUnmapped = true;
 	else if (addr==0xff02 && val==0x81) // Serial Data Transfer (Link Cable)
 		write(STDOUT_FILENO, mem+0xff01, 1);
+	else if (addr==0xff46) // DMA Transfer
+		memcpy(mem+0xfe00, mem+((uint16_t)val<<8), 0xa0);
 	else if (addr>=0x2000 && addr<0x4000)
 		selectedROMBank = val & 0x1f;
 	else if (addr>=0x8000)
