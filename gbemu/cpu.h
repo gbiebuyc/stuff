@@ -372,8 +372,8 @@ void insCF() { push(PC); PC=0x08; }
 void insDF() { push(PC); PC=0x18; }
 void insEF() { push(PC); PC=0x28; }
 void insFF() { push(PC); PC=0x38; }
-void insE8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff); SP+=i; }
-void insF8() { int8_t i=fetchByte(); setFlags(0, 0, 0, (((uint32_t)SP)+i)>0xffff); regs.HL=SP+i; }
+void insE8() { uint8_t i=fetchByte(); setFlags(0, 0, ((SP&0xf)+(i&0xf))>0xf, ((SP&0xff)+i)>0xff); SP+=(int8_t)i; }
+void insF8() { uint8_t i=fetchByte(); setFlags(0, 0, ((SP&0xf)+(i&0xf))>0xf, ((SP&0xff)+i)>0xff); regs.HL=SP+(int8_t)i; }
 void insF9() { SP = regs.HL; }
 void insEA() { writeByte(fetchWord(), regs.A); }
 void insFA() { regs.A = readByte(fetchWord()); }
