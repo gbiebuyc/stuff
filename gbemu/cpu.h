@@ -24,6 +24,8 @@ void writeByte(uint16_t addr, uint8_t val) {
 		write(STDOUT_FILENO, mem+0xff01, 1);
 	else if (addr==0xff46) // DMA Transfer
 		memcpy(mem+0xfe00, mem+((uint16_t)val<<8), 0xa0);
+	else if (addr==0xff04) // Divider Register
+		mem[0xff04] = 0;
 	else if (addr>=0x2000 && addr<0x4000)
 		selectedROMBank = val & 0x1f;
 	else if (addr>=0x8000)

@@ -67,6 +67,8 @@ union {
 } regs;
 int scanlineCycles;
 int frameCycles;
+int divTimerCycles;
+int counterTimerCycles;
 bool IME;
 int cycles;
 bool isBootROMUnmapped = false;
@@ -125,15 +127,14 @@ int main(int ac, char **av) {
 
 		mem[0xff00] |= 0xcf; // Joypad
 
-		scanlineCycles += cycles;
-		if (scanlineCycles >= 456) {
+		if ((scanlineCycles += cycles) >= 456) {
 			scanlineCycles -= 456;
 			mem[0xff44]++;
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
 		}
 		if (mem[0xff44]==144)
-			mem[0xff0f] |= 1; // V-Blank interrupt
+			mem[0xff0f] |= 1; // V-Blank Interrupt Request
 		int lcd_mode;
 		if (mem[0xff44] >= 144)
 			lcd_mode = 1;
@@ -145,6 +146,21 @@ int main(int ac, char **av) {
 			lcd_mode = 2;
 		mem[0xff41] &= ~3;
 		mem[0xff41] |= lcd_mode;
+
+		if ((divTimerCycles += cycles) >= 256) {
+			divTimerCycles -= 256;
+			mem[0xff04]++;
+		}
+
+		int maxTimerCycles = (int[]){1024, 16, 64, 256}[mem[0xff07]&3];
+		if ((counterTimerCycles += cycles) >= maxTimerCycles) {
+			counterTimerCycles -= maxTimerCycles;
+			mem[0xff05]++;
+			if (mem[0xff05] == 0) {
+				mem[0xff05] = mem[0xff06];
+				mem[0xff0f] |= 4; // Timer Interrupt Request
+			}
+		}
 
 		// Interrupts
 		if (IME && mem[0xff0f] && mem[0xffff]) {
