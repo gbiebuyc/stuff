@@ -106,12 +106,12 @@ int main(int ac, char **av) {
 			flag_str[1] = (regs.F & 0x40) ? 'N' : '-';
 			flag_str[2] = (regs.F & 0x20) ? 'H' : '-';
 			flag_str[3] = (regs.F & 0x10) ? 'C' : '-';
-			printf("PC=%04X AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X %.4s Opcode=%02X %02X\n",
-					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, readByte(PC), readByte(PC+1));
+			printf("PC=%04X AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X %.4s Opcode=%02X %02X IE=%04X IF=%04X cnt=%02X IME=%d\n",
+					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, readByte(PC), readByte(PC+1), mem[0xffff], mem[0xff0f], mem[0xff05], IME);
 			fflush(stdout);
 		}
 		if (isHalted)
-			cycles = 1;
+			cycles = 4;
 		else {
 			uint8_t opcode = fetchByte();
 			cycles = cycleTable[opcode];
@@ -128,7 +128,7 @@ int main(int ac, char **av) {
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
 		}
-		if (mem[0xff44]==144)
+		if ((mem[0xffff]&1) && mem[0xff44]==144)
 			mem[0xff0f] |= 1; // V-Blank Interrupt Request
 		int lcd_mode;
 		if (mem[0xff44] >= 144)
@@ -153,7 +153,10 @@ int main(int ac, char **av) {
 			mem[0xff05]++;
 			if (mem[0xff05] == 0) {
 				mem[0xff05] = mem[0xff06];
-				mem[0xff0f] |= 4; // Timer Interrupt Request
+				if (mem[0xffff]&4) {
+					mem[0xff0f] |= 4; // Timer Interrupt Request
+					isHalted = false;
+				}
 			}
 		}
 
