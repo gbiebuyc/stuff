@@ -116,8 +116,9 @@ uint8_t rotate(uint8_t operand, char mnemonic[4]) {
 }
 
 uint8_t SLA(uint8_t operand) {
-	setFlags(!(operand<<1), 0, 0, operand>>7);
-	return operand << 1;
+	uint8_t carry = operand>>7;
+	setFlags(!(operand<<=1), 0, 0, carry);
+	return operand;
 }
 
 uint8_t SRA(uint8_t operand) {
