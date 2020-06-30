@@ -357,7 +357,7 @@ void insF5() { push(regs.AF); }
 void insC1() { regs.BC=pop(); }
 void insD1() { regs.DE=pop(); }
 void insE1() { regs.HL=pop(); }
-void insF1() { regs.AF=pop(); }
+void insF1() { regs.AF=pop(); regs.F &= 0xf0; }
 void ins18() { int8_t i=fetchByte(); PC+=i; }
 void ins20() { int8_t i=fetchByte(); if (!FLAG_Z) {PC+=i; cycles+=4;} }
 void ins28() { int8_t i=fetchByte(); if (FLAG_Z) {PC+=i; cycles+=4;} }
