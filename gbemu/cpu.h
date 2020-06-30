@@ -401,7 +401,7 @@ void cb03() { regs.E = rotate(regs.E, "RLC "); }
 void cb04() { regs.H = rotate(regs.H, "RLC "); }
 void cb05() { regs.L = rotate(regs.L, "RLC "); }
 void cb06() { writeByte(regs.HL, rotate(readByte(regs.HL), "RLC ")); }
-void cb07() { regs.A = rotate(regs.A, "RRC "); }
+void cb07() { regs.A = rotate(regs.A, "RLC "); }
 void cb08() { regs.B = rotate(regs.B, "RRC "); }
 void cb09() { regs.C = rotate(regs.C, "RRC "); }
 void cb0A() { regs.D = rotate(regs.D, "RRC "); }
@@ -417,7 +417,7 @@ void cb13() { regs.E = rotate(regs.E, "RL  "); }
 void cb14() { regs.H = rotate(regs.H, "RL  "); }
 void cb15() { regs.L = rotate(regs.L, "RL  "); }
 void cb16() { writeByte(regs.HL, rotate(readByte(regs.HL), "RL  ")); }
-void cb17() { regs.A = rotate(regs.A, "RR  "); }
+void cb17() { regs.A = rotate(regs.A, "RL  "); }
 void cb18() { regs.B = rotate(regs.B, "RR  "); }
 void cb19() { regs.C = rotate(regs.C, "RR  "); }
 void cb1A() { regs.D = rotate(regs.D, "RR  "); }
