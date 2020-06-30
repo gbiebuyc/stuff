@@ -80,6 +80,12 @@ int selectedROMBank = 1;
 int min(int a, int b) { return ((a < b) ? a : b); }
 int max(int a, int b) { return ((a > b) ? a : b); }
 
+void requestInterrupt(uint8_t interrupt) {
+	isHalted = false;
+	if (mem[0xffff] & interrupt)
+		mem[0xff0f] |= interrupt;
+}
+
 
 int main(int ac, char **av) {
 	SDL_Window *window;
@@ -127,9 +133,59 @@ int main(int ac, char **av) {
 			mem[0xff44]++;
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
+			if (mem[0xff44]<144 && (mem[0xff41]&0x40)) { // Coincidence Interrupt
+				bool coincidence = mem[0xff44]==mem[0xff45];
+				if (coincidence && (mem[0xff41]&4))
+					requestInterrupt(0x02);
+				else if (!coincidence && !(mem[0xff41]&4))
+					requestInterrupt(0x02);
+			}
+			if ((mem[0xffff]&1) && mem[0xff44]==144)
+				mem[0xff0f] |= 1; // V-Blank Interrupt Request
+			int sy = mem[0xff44];
+			if (sy < 144) {
+				uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
+				uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
+				uint8_t *spriteAttrTable = mem+0xfe00;
+				uint8_t *spriteData = mem+0x8000;
+				uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0x000000};
+				for (int sx=0; sx<160; sx++) {
+					int x = (sx+mem[0xff43])&0xff;
+					int y = (sy+mem[0xff42])&0xff;
+					int tileX = x>>3;
+					int tileY = y>>3;
+					int u = x&7;
+					int v = y&7;
+					int tileIndex = BGTileMap[tileY*32 + tileX];
+					if (!(mem[0xff40]&0x10))
+						tileIndex = (int8_t)tileIndex + 128;
+					uint8_t *tile = tileData + tileIndex*16;
+					uint16_t pixels = ((uint16_t*)tile)[v];
+					uint32_t px = pixels >> (7-u);
+					px = (px>>7&2) | (px&1);
+					px = palette[(mem[0xff47]>>(px*2))&3];
+					((uint32_t*)surface->pixels)[sy*160 + sx] = px;
+				}
+				for (int i=0; i<40; i++) {
+					uint8_t *sprite = spriteAttrTable + i*4;
+					int spriteY = (int)sprite[0] - 16;
+					int v = sy - spriteY;
+					if (v < 0 || v > 7)
+						continue;
+					int spriteX = (int)sprite[1] - 8;
+					uint8_t *tile = spriteData + sprite[2]*16;
+					uint16_t pixels = ((uint16_t*)tile)[v];
+					uint8_t spritePalette = mem[(sprite[3]&10) ? 0xff49 : 0xff48];
+					for (int sx=max(0, spriteX); sx<min(160, spriteX+8); sx++) {
+						int u = sx - spriteX;
+						uint32_t px = pixels >> (7-u);
+						px = (px>>7&2) | (px&1);
+						px = palette[(spritePalette>>(px*2))&3];
+						((uint32_t*)surface->pixels)[sy*160 + sx] = px;
+					}
+				}
+			}
 		}
-		if ((mem[0xffff]&1) && mem[0xff44]==144)
-			mem[0xff0f] |= 1; // V-Blank Interrupt Request
 		int lcd_mode;
 		if (mem[0xff44] >= 144)
 			lcd_mode = 1;
@@ -190,53 +246,10 @@ int main(int ac, char **av) {
 					}
 				}
 			}
-			uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
-			uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
-			uint8_t *spriteAttrTable = mem+0xfe00;
-			uint8_t *spriteData = mem+0x8000;
-			uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0x000000};
-			// printf("scroll x: %d\n", mem[0xff43]); fflush(stdout);
-			for (int sy=0; sy<144; sy++) {
-				for (int sx=0; sx<160; sx++) {
-					int x = (sx+mem[0xff43])&0xff;
-					int y = (sy+mem[0xff42])&0xff;
-					int tileX = x>>3;
-					int tileY = y>>3;
-					int u = x&7;
-					int v = y&7;
-					int tileIndex = BGTileMap[tileY*32 + tileX];
-					if (!(mem[0xff40]&0x10))
-						tileIndex = (int8_t)tileIndex + 128;
-					uint8_t *tile = tileData + tileIndex*16;
-					uint16_t pixels = ((uint16_t*)tile)[v];
-					uint32_t px = pixels >> (7-u);
-					px = (px>>7&2) | (px&1);
-					px = palette[(mem[0xff47]>>(px*2))&3];
-					((uint32_t*)surface->pixels)[sy*160 + sx] = px;
-				}
-				for (int i=0; i<40; i++) {
-					uint8_t *sprite = spriteAttrTable + i*4;
-					int spriteY = (int)sprite[0] - 16;
-					int v = sy - spriteY;
-					if (v < 0 || v > 7)
-						continue;
-					int spriteX = (int)sprite[1] - 8;
-					uint8_t *tile = spriteData + sprite[2]*16;
-					uint16_t pixels = ((uint16_t*)tile)[v];
-					uint8_t spritePalette = mem[(sprite[3]&10) ? 0xff49 : 0xff48];
-					for (int sx=max(0, spriteX); sx<min(160, spriteX+8); sx++) {
-						int u = sx - spriteX;
-						uint32_t px = pixels >> (7-u);
-						px = (px>>7&2) | (px&1);
-						px = palette[(spritePalette>>(px*2))&3];
-						((uint32_t*)surface->pixels)[sy*160 + sx] = px;
-					}
-				}
-			}
 			if (isBootROMUnmapped) { // Skip display of boot animation
 				SDL_UpdateWindowSurface(window);
 				// SDL_Delay(16);
-				SDL_Delay(5);
+				SDL_Delay(1);
 			}
 		}
 	}
