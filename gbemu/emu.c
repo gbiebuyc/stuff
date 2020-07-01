@@ -212,7 +212,7 @@ int main(int ac, char **av) {
 			}
 		}
 
-		// Interrupts
+		// Interrupt Execution
 		if (IME && mem[0xff0f] && mem[0xffff]) {
 			for (int i=0; i<5; i++) {
 				int mask = 1<<i;
