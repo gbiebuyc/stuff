@@ -179,6 +179,8 @@ int main(int ac, char **av) {
 						int u = sx - spriteX;
 						uint32_t px = pixels >> (7-u);
 						px = (px>>7&2) | (px&1);
+						if (!px) // transparent
+							continue;
 						px = palette[(spritePalette>>(px*2))&3];
 						((uint32_t*)surface->pixels)[sy*160 + sx] = px;
 					}
