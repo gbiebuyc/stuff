@@ -177,13 +177,15 @@ int main(int ac, char **av) {
 					int v = sy - spriteY;
 					if (v < 0 || v > 7)
 						continue;
+					bool flipX = sprite[3]&0x20;
+					bool flipY = sprite[3]&0x40;
 					int spriteX = (int)sprite[1] - 8;
 					uint8_t *tile = spriteData + sprite[2]*16;
-					uint16_t pixels = ((uint16_t*)tile)[v];
+					uint16_t pixels = ((uint16_t*)tile)[flipY ? (7-v) : v];
 					uint8_t spritePalette = mem[(sprite[3]&10) ? 0xff49 : 0xff48];
 					for (int sx=max(0, spriteX); sx<min(160, spriteX+8); sx++) {
 						int u = sx - spriteX;
-						uint32_t px = pixels >> (7-u);
+						uint32_t px = pixels >> (flipX ? u : (7-u));
 						px = (px>>7&2) | (px&1);
 						if (!px) // transparent
 							continue;
@@ -252,8 +254,7 @@ int main(int ac, char **av) {
 			}
 			if (isBootROMUnmapped) { // Skip display of boot animation
 				SDL_UpdateWindowSurface(window);
-				// SDL_Delay(16);
-				SDL_Delay(5);
+				SDL_Delay(14);
 			}
 		}
 	}
