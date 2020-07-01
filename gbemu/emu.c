@@ -172,7 +172,7 @@ int main(int ac, char **av) {
 				uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
 				uint8_t *spriteAttrTable = mem+0xfe00;
 				uint8_t *spriteData = mem+0x8000;
-				for (int screenX=0; screenX<160; screenX++) {
+				for (int screenX=0; screenX<160; screenX++) { // Draw background
 					int x = (screenX+mem[0xff43])&0xff;
 					int y = (LY+mem[0xff42])&0xff;
 					int tileX = x>>3;
@@ -189,7 +189,7 @@ int main(int ac, char **av) {
 					px = palette[(mem[0xff47]>>(px*2))&3];
 					((uint32_t*)surface->pixels)[LY*160 + screenX] = px;
 				}
-				for (int i=0; i<40; i++) {
+				for (int i=0; i<40; i++) {                    // Draw Sprites
 					uint8_t *sprite = spriteAttrTable + i*4;
 					int spriteY = (int)sprite[0] - 16;
 					int v = LY - spriteY;
