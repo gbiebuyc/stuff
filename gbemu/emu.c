@@ -140,27 +140,42 @@ int main(int ac, char **av) {
 			mem[0xff44]++;
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
-			bool coincidenceFlag = mem[0xff44]==mem[0xff45];
+			int LY = mem[0xff44];
+			int LYC = mem[0xff45];
+			bool coincidenceFlag = LY==LYC;
 			mem[0xff41] = coincidenceFlag ? (mem[0xff41]&~4) : (mem[0xff41]|4);
 			if ((mem[0xff41]&0x40) && coincidenceFlag) {
 				requestInterrupt(0x02); // Coincidence Interrupt
 			}
-			if (mem[0xff44]==144) {
+			if (LY==144) {
 				requestInterrupt(0x01); // V-Blank Interrupt
+				SDL_Event e;
+				while (SDL_PollEvent(&e)) {
+					if (e.type == SDL_QUIT)
+						exit(0);
+					if (e.type == SDL_KEYDOWN) {
+						if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+							exit(0);
+						}
+					}
+				}
+				if (isBootROMUnmapped) { // Skip display of boot animation
+					SDL_UpdateWindowSurface(window);
+					SDL_Delay(14);
+				}
 			}
-			int sy = mem[0xff44];
 			bool isDisplayDisabled = !(mem[0xff40] & 0x80);
 			if (isDisplayDisabled) {
 				SDL_FillRect(surface, NULL, palette[0]); // Clear the screen
 			}
-			else if (sy < 144) {
+			else if (LY < 144) {
 				uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
 				uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
 				uint8_t *spriteAttrTable = mem+0xfe00;
 				uint8_t *spriteData = mem+0x8000;
-				for (int sx=0; sx<160; sx++) {
-					int x = (sx+mem[0xff43])&0xff;
-					int y = (sy+mem[0xff42])&0xff;
+				for (int screenX=0; screenX<160; screenX++) {
+					int x = (screenX+mem[0xff43])&0xff;
+					int y = (LY+mem[0xff42])&0xff;
 					int tileX = x>>3;
 					int tileY = y>>3;
 					int u = x&7;
@@ -173,12 +188,12 @@ int main(int ac, char **av) {
 					uint32_t px = pixels >> (7-u);
 					px = (px>>7&2) | (px&1);
 					px = palette[(mem[0xff47]>>(px*2))&3];
-					((uint32_t*)surface->pixels)[sy*160 + sx] = px;
+					((uint32_t*)surface->pixels)[LY*160 + screenX] = px;
 				}
 				for (int i=0; i<40; i++) {
 					uint8_t *sprite = spriteAttrTable + i*4;
 					int spriteY = (int)sprite[0] - 16;
-					int v = sy - spriteY;
+					int v = LY - spriteY;
 					if (v < 0 || v > 7)
 						continue;
 					bool flipX = sprite[3]&0x20;
@@ -187,14 +202,14 @@ int main(int ac, char **av) {
 					uint8_t *tile = spriteData + sprite[2]*16;
 					uint16_t pixels = ((uint16_t*)tile)[flipY ? (7-v) : v];
 					uint8_t spritePalette = mem[(sprite[3]&10) ? 0xff49 : 0xff48];
-					for (int sx=max(0, spriteX); sx<min(160, spriteX+8); sx++) {
-						int u = sx - spriteX;
+					for (int screenX=max(0, spriteX); screenX<min(160, spriteX+8); screenX++) {
+						int u = screenX - spriteX;
 						uint32_t px = pixels >> (flipX ? u : (7-u));
 						px = (px>>7&2) | (px&1);
 						if (!px) // transparent
 							continue;
 						px = palette[(spritePalette>>(px*2))&3];
-						((uint32_t*)surface->pixels)[sy*160 + sx] = px;
+						((uint32_t*)surface->pixels)[LY*160 + screenX] = px;
 					}
 				}
 			}
@@ -238,24 +253,6 @@ int main(int ac, char **av) {
 					isHalted = false;
 					break;
 				}
-			}
-		}
-
-		if ((frameCycles += cycles) >= 70224) {
-			frameCycles -= 70224;
-			SDL_Event e;
-			while (SDL_PollEvent(&e)) {
-				if (e.type == SDL_QUIT)
-					exit(0);
-				if (e.type == SDL_KEYDOWN) {
-					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-						exit(0);
-					}
-				}
-			}
-			if (isBootROMUnmapped) { // Skip display of boot animation
-				SDL_UpdateWindowSurface(window);
-				SDL_Delay(14);
 			}
 		}
 	}
