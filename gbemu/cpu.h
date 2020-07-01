@@ -7,10 +7,25 @@ uint8_t readByte(uint16_t addr) {
 		return gamerom[addr];
 	else if (addr<0x8000) // ROM Bank 01~NN
 		return gamerom[addr-0x4000 + 0x4000*selectedROMBank];
+	else if (addr==0xff00) {
+		const uint8_t *state = SDL_GetKeyboardState(NULL);
+		uint8_t ret = mem[0xff00] | 0xf;
+		if ((mem[0xff00]&0x20)==0) {
+			if (state[SDL_SCANCODE_RETURN]) ret &= ~8;
+			if (state[SDL_SCANCODE_LSHIFT]) ret &= ~4;
+			if (state[SDL_SCANCODE_B]) ret &= ~2;
+			if (state[SDL_SCANCODE_A]) ret &= ~1;
+		}
+		else if ((mem[0xff00]&0x10)==0) {
+			if (state[SDL_SCANCODE_DOWN]) ret &= ~8;
+			if (state[SDL_SCANCODE_UP]) ret &= ~4;
+			if (state[SDL_SCANCODE_LEFT]) ret &= ~2;
+			if (state[SDL_SCANCODE_RIGHT]) ret &= ~1;
+		}
+		return ret;
+	}
 	else if (addr>=0x8000)
 		return mem[addr];
-	else
-		printf("warning: read at %#x\n", addr);
 }
 
 uint16_t readWord(uint16_t addr) {
