@@ -126,8 +126,6 @@ int main(int ac, char **av) {
 			instrs[opcode]();
 		}
 
-		mem[0xff00] |= 0xcf; // Joypad
-
 		if ((scanlineCycles += cycles) >= 456) {
 			scanlineCycles -= 456;
 			mem[0xff44]++;
