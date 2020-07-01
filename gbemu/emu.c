@@ -81,9 +81,9 @@ int min(int a, int b) { return ((a < b) ? a : b); }
 int max(int a, int b) { return ((a > b) ? a : b); }
 
 void requestInterrupt(uint8_t interrupt) {
-	isHalted = false;
 	if (mem[0xffff] & interrupt)
 		mem[0xff0f] |= interrupt;
+	isHalted = false;
 }
 
 
@@ -133,15 +133,14 @@ int main(int ac, char **av) {
 			mem[0xff44]++;
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
-			if (mem[0xff44]<144 && (mem[0xff41]&0x40)) { // Coincidence Interrupt
-				bool coincidence = mem[0xff44]==mem[0xff45];
-				if (coincidence && (mem[0xff41]&4))
-					requestInterrupt(0x02);
-				else if (!coincidence && !(mem[0xff41]&4))
-					requestInterrupt(0x02);
+			bool coincidenceFlag = mem[0xff44]==mem[0xff45];
+			mem[0xff41] = coincidenceFlag ? (mem[0xff41]&~4) : (mem[0xff41]|4);
+			if ((mem[0xff41]&0x40) && coincidenceFlag) {
+				requestInterrupt(0x02); // Coincidence Interrupt
 			}
-			if ((mem[0xffff]&1) && mem[0xff44]==144)
-				mem[0xff0f] |= 1; // V-Blank Interrupt Request
+			if (mem[0xff44]==144) {
+				requestInterrupt(0x01); // V-Blank Interrupt
+			}
 			int sy = mem[0xff44];
 			if (sy < 144) {
 				uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
@@ -209,10 +208,7 @@ int main(int ac, char **av) {
 			mem[0xff05]++;
 			if (mem[0xff05] == 0) {
 				mem[0xff05] = mem[0xff06];
-				if (mem[0xffff]&4) {
-					mem[0xff0f] |= 4; // Timer Interrupt Request
-					isHalted = false;
-				}
+				requestInterrupt(0x04); // Timer Interrupt
 			}
 		}
 
@@ -249,7 +245,7 @@ int main(int ac, char **av) {
 			if (isBootROMUnmapped) { // Skip display of boot animation
 				SDL_UpdateWindowSurface(window);
 				// SDL_Delay(16);
-				SDL_Delay(1);
+				SDL_Delay(5);
 			}
 		}
 	}
