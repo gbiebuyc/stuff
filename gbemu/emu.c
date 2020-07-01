@@ -24,6 +24,7 @@
 #define JOYPAD_LEFT SDL_SCANCODE_LEFT
 #define JOYPAD_RIGHT SDL_SCANCODE_RIGHT
 
+uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0x000000};
 uint8_t *mem;
 uint8_t *gamerom;
 uint8_t bootrom[] = {
@@ -148,12 +149,15 @@ int main(int ac, char **av) {
 				requestInterrupt(0x01); // V-Blank Interrupt
 			}
 			int sy = mem[0xff44];
-			if (sy < 144) {
+			bool isDisplayDisabled = !(mem[0xff40] & 0x80);
+			if (isDisplayDisabled) {
+				SDL_FillRect(surface, NULL, palette[0]); // Clear the screen
+			}
+			else if (sy < 144) {
 				uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
 				uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
 				uint8_t *spriteAttrTable = mem+0xfe00;
 				uint8_t *spriteData = mem+0x8000;
-				uint32_t palette[] = {0xffffff, 0xaaaaaa, 0x555555, 0x000000};
 				for (int sx=0; sx<160; sx++) {
 					int x = (sx+mem[0xff43])&0xff;
 					int y = (sy+mem[0xff42])&0xff;
@@ -245,9 +249,6 @@ int main(int ac, char **av) {
 					exit(0);
 				if (e.type == SDL_KEYDOWN) {
 					if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-						// printf("0xffff ie: %x\n", mem[0xffff]);
-						// printf("0xff40 lcdc: %x\n", mem[0xff40]);
-						// printf("0xff47 palette: %x\n", mem[0xff47]);
 						exit(0);
 					}
 				}
