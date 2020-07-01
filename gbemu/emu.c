@@ -128,11 +128,11 @@ int main(int ac, char **av) {
 		if (isHalted)
 			cycles = 4;
 		else {
-			uint8_t opcode = fetchByte();
+			uint8_t opcode = fetchByte(); // Fetch opcode
 			cycles = cycleTable[opcode];
 			if (!instrs[opcode])
 				exit(printf("Invalid opcode: %#x\n", opcode));
-			instrs[opcode]();
+			instrs[opcode]();             // Execute
 		}
 
 		if ((scanlineCycles += cycles) >= 456) {
