@@ -142,6 +142,7 @@ int main(int ac, char **av) {
 				mem[0xff44] = 0;
 			int LY = mem[0xff44];
 			int LYC = mem[0xff45];
+			bool isDisplayEnabled = mem[0xff40] & 0x80;
 			bool coincidenceFlag = LY==LYC;
 			mem[0xff41] = coincidenceFlag ? (mem[0xff41]&~4) : (mem[0xff41]|4);
 			if ((mem[0xff41]&0x40) && coincidenceFlag) {
@@ -160,15 +161,13 @@ int main(int ac, char **av) {
 					}
 				}
 				if (isBootROMUnmapped) { // Skip display of boot animation
+					if (!isDisplayEnabled) // Clear the display if disabled
+						SDL_FillRect(surface, NULL, palette[0]);
 					SDL_UpdateWindowSurface(window);
 					SDL_Delay(14);
 				}
 			}
-			bool isDisplayDisabled = !(mem[0xff40] & 0x80);
-			if (isDisplayDisabled) {
-				SDL_FillRect(surface, NULL, palette[0]); // Clear the screen
-			}
-			else if (LY < 144) {
+			if (LY < 144 && isDisplayEnabled) {
 				uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
 				uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
 				uint8_t *spriteAttrTable = mem+0xfe00;
