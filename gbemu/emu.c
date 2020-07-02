@@ -144,7 +144,7 @@ int main(int ac, char **av) {
 			int LYC = mem[0xff45];
 			bool isDisplayEnabled = mem[0xff40] & 0x80;
 			bool coincidenceFlag = LY==LYC;
-			mem[0xff41] = coincidenceFlag ? (mem[0xff41]&~4) : (mem[0xff41]|4);
+			mem[0xff41] = coincidenceFlag ? (mem[0xff41]|4) : (mem[0xff41]&~4);
 			if ((mem[0xff41]&0x40) && coincidenceFlag) {
 				requestInterrupt(0x02); // Coincidence Interrupt
 			}
