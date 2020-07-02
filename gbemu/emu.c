@@ -100,7 +100,7 @@ int main(int ac, char **av) {
 	SDL_Surface *surface;
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
-        return 1;
+		return 1;
 	}
 	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
 	surface = SDL_GetWindowSurface(window);
@@ -111,6 +111,7 @@ int main(int ac, char **av) {
 	int i = 0;
 	while (fread(gamerom+i, 1, 0x100, f) == 0x100)
 		i += 0x100;
+
 	while (true) {
 		// if (!debug && PC==0x100)
 		// 	debug = true;
@@ -124,6 +125,7 @@ int main(int ac, char **av) {
 					PC, regs.AF, regs.BC, regs.DE, regs.HL, SP, flag_str, readByte(PC), readByte(PC+1), mem[0xffff], mem[0xff0f], mem[0xff05], IME);
 			fflush(stdout);
 		}
+
 		if (isHalted)
 			cycles = 4;
 		else {
@@ -139,7 +141,7 @@ int main(int ac, char **av) {
 			mem[0xff44]++;
 			if (mem[0xff44] > 153)
 				mem[0xff44] = 0;
-			int LY = mem[0xff44];
+			int LY  = mem[0xff44];
 			int LYC = mem[0xff45];
 			bool isDisplayEnabled = mem[0xff40] & 0x80;
 			bool coincidenceFlag = LY==LYC;
@@ -153,11 +155,9 @@ int main(int ac, char **av) {
 				while (SDL_PollEvent(&e)) {
 					if (e.type == SDL_QUIT)
 						exit(0);
-					if (e.type == SDL_KEYDOWN) {
-						if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+					if (e.type == SDL_KEYDOWN)
+						if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 							exit(0);
-						}
-					}
 				}
 				if (isBootROMUnmapped) { // Skip display of boot animation
 					if (!isDisplayEnabled) // Clear the display if disabled
@@ -236,6 +236,8 @@ int main(int ac, char **av) {
 				}
 			}
 		}
+
+		// Set LCD mode flag
 		int lcd_mode;
 		if (mem[0xff44] >= 144)
 			lcd_mode = 1;
@@ -248,6 +250,7 @@ int main(int ac, char **av) {
 		mem[0xff41] &= ~3;
 		mem[0xff41] |= lcd_mode;
 
+		// Update timers
 		if ((divTimerCycles += cycles) >= 256) {
 			divTimerCycles -= 256;
 			mem[0xff04]++;
@@ -263,7 +266,7 @@ int main(int ac, char **av) {
 			}
 		}
 
-		// Interrupt Execution
+		// Execute interrupts
 		uint8_t IE = mem[0xffff];
 		uint8_t IF = mem[0xff0f];
 		if (IME && IE && IF) {
