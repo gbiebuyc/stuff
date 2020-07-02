@@ -75,7 +75,6 @@ union {
 	struct { uint8_t F, A, C, B, E, D, L, H; };
 } regs;
 int scanlineCycles;
-int frameCycles;
 int divTimerCycles;
 int counterTimerCycles;
 bool IME;
