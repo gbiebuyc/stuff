@@ -166,19 +166,36 @@ int main(int ac, char **av) {
 					SDL_Delay(14);
 				}
 			}
+
 			if (LY < 144 && isDisplayEnabled) {
-				uint8_t *BGTileMap = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
-				uint8_t *tileData = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
-				uint8_t *spriteAttrTable = mem+0xfe00;
-				uint8_t *spriteData = mem+0x8000;
-				for (int screenX=0; screenX<160; screenX++) { // Draw background
-					int x = (screenX+mem[0xff43])&0xff;
-					int y = (LY+mem[0xff42])&0xff;
+
+				// Draw BG & Window
+				uint8_t *BGTileMap  = mem + ((mem[0xff40]&0x08) ? 0x9c00 : 0x9800);
+				uint8_t *WinTileMap = mem + ((mem[0xff40]&0x40) ? 0x9c00 : 0x9800);
+				uint8_t *tileData   = mem + ((mem[0xff40]&0x10) ? 0x8000 : 0x8800);
+				bool isWindowDisplayEnabled = mem[0xff40]&0x20;
+				bool isBGDisplayEnabled = mem[0xff40]&0x01;
+				for (int screenX=0; screenX<160; screenX++) {
+					int WY=mem[0xff4a], WX=mem[0xff4b]-7;
+					int SCY=mem[0xff42], SCX=mem[0xff43];
+					uint8_t *tileMap;
+					int x, y;
+					if (isWindowDisplayEnabled && WY<=LY && WX<=screenX) {
+						x = (screenX-WX)&0xff;
+						y = (LY-WY)&0xff;
+						tileMap = WinTileMap;
+					} else if (isBGDisplayEnabled) {
+						x = (screenX+SCX)&0xff;
+						y = (LY+SCY)&0xff;
+						tileMap = BGTileMap;
+					} else {
+						break;
+					}
 					int tileX = x>>3;
 					int tileY = y>>3;
 					int u = x&7;
 					int v = y&7;
-					int tileIndex = BGTileMap[tileY*32 + tileX];
+					int tileIndex = tileMap[tileY*32 + tileX];
 					if (!(mem[0xff40]&0x10))
 						tileIndex = (int8_t)tileIndex + 128;
 					uint8_t *tile = tileData + tileIndex*16;
@@ -188,7 +205,14 @@ int main(int ac, char **av) {
 					px = palette[(mem[0xff47]>>(px*2))&3];
 					((uint32_t*)surface->pixels)[LY*160 + screenX] = px;
 				}
-				for (int i=0; i<40; i++) {                    // Draw Sprites
+
+				// Draw Sprites
+				uint8_t *spriteAttrTable = mem+0xfe00;
+				uint8_t *spriteData = mem+0x8000;
+				bool isSpriteDisplayEnabled = mem[0xff40]&0x02;
+				for (int i=0; i<40; i++) {
+					if (!isSpriteDisplayEnabled)
+						break;
 					uint8_t *sprite = spriteAttrTable + i*4;
 					int spriteY = (int)sprite[0] - 16;
 					int v = LY - spriteY;
@@ -240,15 +264,16 @@ int main(int ac, char **av) {
 		}
 
 		// Interrupt Execution
-		if (IME && mem[0xff0f] && mem[0xffff]) {
+		uint8_t IE = mem[0xffff];
+		uint8_t IF = mem[0xff0f];
+		if (IME && IE && IF) {
 			for (int i=0; i<5; i++) {
 				int mask = 1<<i;
-				if ((mem[0xff0f]&mask) && (mem[0xffff]&mask)) {
+				if (IE & IF & mask) {
 					push(PC);
 					PC = "@HPX`"[i];
 					mem[0xff0f] &= ~mask;
 					IME = 0;
-					isHalted = false;
 					break;
 				}
 			}
