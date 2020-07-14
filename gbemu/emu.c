@@ -97,13 +97,19 @@ void requestInterrupt(uint8_t interrupt) {
 
 int main(int ac, char **av) {
 	SDL_Window *window;
+	SDL_Renderer *renderer;
+	SDL_Texture *screenTexture;
 	SDL_Surface *surface;
+
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
 		return 1;
 	}
-	window = SDL_CreateWindow("SDL2 Example", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 160, 144, 0);
-	surface = SDL_GetWindowSurface(window);
+	SDL_CreateWindowAndRenderer(160*2, 144*2, SDL_WINDOW_RESIZABLE, &window, &renderer);
+	SDL_RenderSetLogicalSize(renderer, 160, 144); // Keep a fixed aspect ratio
+	// SDL_RenderSetIntegerScale(renderer, true); // Force integer scaling
+	screenTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 160, 144);
+	surface = SDL_CreateRGBSurfaceWithFormat(0, 160, 144, 32, SDL_PIXELFORMAT_ARGB8888);
 	mem = malloc(0x10000);
 	gamerom = malloc(8388608); // max 8 MB cartridges
 	FILE *f = fopen(av[1], "rb");
@@ -162,7 +168,9 @@ int main(int ac, char **av) {
 				if (isBootROMUnmapped) { // Skip display of boot animation
 					if (!isDisplayEnabled) // Clear the display if disabled
 						SDL_FillRect(surface, NULL, palette[0]);
-					SDL_UpdateWindowSurface(window);
+					SDL_UpdateTexture(screenTexture, NULL, surface->pixels, surface->pitch);
+					SDL_RenderCopy(renderer, screenTexture, NULL, NULL);
+					SDL_RenderPresent(renderer);
 					SDL_Delay(14);
 				}
 			}
