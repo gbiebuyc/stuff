@@ -20,6 +20,7 @@
 class Window {
 public:
 	static int init();
+	static void ExitAndCleanup();
 	//~Window(void);
 	static GLFWwindow* getWindow();
 private:

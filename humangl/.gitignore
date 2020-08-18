@@ -28,3 +28,4 @@ humangl
 humangl.exe
 *.o
 humangl.fr.pdf
+imgui.ini

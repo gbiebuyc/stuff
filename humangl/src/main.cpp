@@ -34,10 +34,10 @@ int		main( void )
 
 	Skeleton::init();
 
-	cout << "Use Left/Right arrows to cycle through animations." << endl;
-
     // draw
 	Loop::loop();
+
+	Window::ExitAndCleanup();
 
 	return 1;
 }
