@@ -20,7 +20,7 @@ using namespace std;
 class Skeleton {
 	public:
 		static void init();
-		static void draw(unsigned int anim, unsigned int frame);
+		static void draw();
 	private:
 
 };

@@ -24,8 +24,6 @@ private:
 	static bool shouldStop;
 	static double frameTime;
 	const static double refreshingRate;
-	static unsigned int animIndex;
-	static unsigned int frameIndex;
 };
 
 #endif

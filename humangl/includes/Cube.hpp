@@ -10,7 +10,7 @@ class Cube {
 public:
 	static void init();
 	static void setViewMat(float *mat);
-	static void draw(float *mat, array<float, 3> color);
+	static void draw(float *mat, float color[3]);
 
 private:
 	static GLuint VAO, VBO, EBO;
