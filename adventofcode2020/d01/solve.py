@@ -1,4 +1,4 @@
-nums = [int(n) for n in open('input', 'r').readlines()]
+nums = [int(n) for n in open('input')]
 
 def part1():
     for i in range(len(nums)):
