@@ -1,6 +1,6 @@
 import re
 
-passports = open('input').read().split('\n\n')
+passports = open('input-04.txt').read().split('\n\n')
 ans=0
 for p in passports:
     byr=0

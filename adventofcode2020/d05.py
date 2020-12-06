@@ -20,7 +20,7 @@ def decode(code):
 
 ans=0
 seats=[0]*128*8
-for code in open('input'):
+for code in open('input-05.txt'):
     seatID = decode(code)
     ans = max(ans, seatID)
     seats[seatID] = 1
