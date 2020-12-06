@@ -7,7 +7,7 @@ def check(i, c, s):
         return False
     return s[i] == c
 
-for l in open('input'):
+for l in open('input-02.txt'):
     l = l.replace('-', ' ').replace(':', ' ').split()
     if int(l[0]) <= l[3].count(l[2]) <= int(l[1]):
         ans1 += 1

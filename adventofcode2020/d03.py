@@ -1,4 +1,4 @@
-lines=open('input').read().splitlines()
+lines=open('input-03.txt').read().splitlines()
 def solve(dx, dy):
     x=0
     ans=0

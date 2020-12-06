@@ -1,4 +1,4 @@
-nums = [int(n) for n in open('input')]
+nums = [int(n) for n in open('input-01.txt')]
 
 def part1():
     for i in range(len(nums)):
