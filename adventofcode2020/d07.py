@@ -11,5 +11,5 @@ def part1(bag):
 def part2(bag):
     return 1 + sum([count*part2(bag) for bag, count in rules[bag]])
 
-print(sum([part1(rule) for rule in rules]))
+print(sum(map(part1, rules)))
 print(part2('shiny gold')-1)
