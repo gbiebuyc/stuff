@@ -1,7 +1,6 @@
-grid = [list(row.strip()) for row in open('input-11.txt')]
-
+gridOrig = [list(row.strip()) for row in open('input-11.txt')]
+grid = [row.copy() for row in gridOrig]
 s=set()
-
 adj=((0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1))
 
 def isinside(x, y):
@@ -39,8 +38,11 @@ while 1:
 representation=''.join([item for sublist in grid for item in sublist])
 print(representation.count('#'))
 
-grid = [list(row.strip()) for row in open('input-11.txt')]
 
+
+# PART 2
+
+grid = [row.copy() for row in gridOrig]
 s=set()
 
 while 1:
