@@ -15,15 +15,14 @@ while 1:
     newgrid = [row.copy() for row in grid]
     for y in range(len(grid)):
         for x in range(len(grid[0])):
+            occupied=0
             if grid[y][x]=='L':
-                occupied=0
                 for dx, dy in adj:
                     if isoccupied(x+dx, y+dy):
                         occupied+=1
                 if occupied==0:
                     newgrid[y][x]='#'
             elif grid[y][x]=='#':
-                occupied=0
                 for dx, dy in adj:
                     if isoccupied(x+dx, y+dy):
                         occupied+=1
@@ -49,32 +48,25 @@ while 1:
     newgrid = [row.copy() for row in grid]
     for y in range(len(grid)):
         for x in range(len(grid[0])):
+            occupied=0
             if grid[y][x]=='L':
-                occupied=0
                 for dx, dy in adj:
                     d=1
-                    while 1:
-                        if not isinside(x+dx*d, y+dy*d):
-                            break
+                    while isinside(x+dx*d, y+dy*d):
                         if grid[y+dy*d][x+dx*d]=='#':
                             occupied+=1
-                            break
-                        if grid[y+dy*d][x+dx*d]=='L':
+                        if grid[y+dy*d][x+dx*d]!='.':
                             break
                         d+=1
                 if occupied==0:
                     newgrid[y][x]='#'
             elif grid[y][x]=='#':
-                occupied=0
                 for dx, dy in adj:
                     d=1
-                    while 1:
-                        if not isinside(x+dx*d, y+dy*d):
-                            break
+                    while isinside(x+dx*d, y+dy*d):
                         if grid[y+dy*d][x+dx*d]=='#':
                             occupied+=1
-                            break
-                        if grid[y+dy*d][x+dx*d]=='L':
+                        if grid[y+dy*d][x+dx*d]!='.':
                             break
                         d+=1
                 if occupied>=5:
