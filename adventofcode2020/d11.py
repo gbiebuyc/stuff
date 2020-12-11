@@ -7,9 +7,7 @@ def isinside(x, y):
     return x>=0 and y>=0 and x<len(grid[0]) and y<len(grid)
 
 def isoccupied(x, y):
-    if isinside(x, y):
-        return grid[y][x]=='#'
-    return False
+    return isinside(x, y) and grid[y][x]=='#'
 
 while 1:
     newgrid = [row.copy() for row in grid]
@@ -38,12 +36,9 @@ representation=''.join([item for sublist in grid for item in sublist])
 print(representation.count('#'))
 
 
-
 # PART 2
-
 grid = [row.copy() for row in gridOrig]
 s=set()
-
 while 1:
     newgrid = [row.copy() for row in grid]
     for y in range(len(grid)):
