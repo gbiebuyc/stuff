@@ -4,8 +4,7 @@ import math
 from sys import argv
 from aoc_cookie import AOC_COOKIE
 
-YEAR=2020
-DAY=12
+YEAR, DAY = 2020, 12
 INPUT_FILE = 'input-%02d.txt' % DAY
 EXAMPLE_FILE = 'input-%02d-example.txt' % DAY
 SUBMIT = 's' in argv[1:]
@@ -45,12 +44,6 @@ def answer(ans):
 
 data = data if SUBMIT else example
 lines = data.splitlines()
-try:
-    nums = [int(n) for n in lines]
-    L = len(nums)
-except:
-    pass
-
 
 d=1
 x, y = 0, 0
