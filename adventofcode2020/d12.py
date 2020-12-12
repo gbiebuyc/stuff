@@ -39,10 +39,9 @@ def submit(ans):
     print(r.text.split('<article><p>')[1].split('</p></article>')[0])
 
 def answer(ans):
+    print(ans)
     if SUBMIT:
         submit(ans)
-    else:
-        print(ans)
 
 data = data if SUBMIT else example
 lines = data.splitlines()
