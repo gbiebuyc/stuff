@@ -1,3 +1,4 @@
 aoc_cookie.py
 __pycache__/
 *.swp
+input-*

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import requests
+import math
 from sys import argv
 from aoc_cookie import AOC_COOKIE
 
@@ -52,4 +53,66 @@ except:
     pass
 
 
+d=1
+x, y = 0, 0
+for l in lines:
+    a= l[0]
+    num = int(l[1:])
+    if a=='N':
+        y-=num
+    elif a=='S':
+        y+=num
+    elif a=='E':
+        x+=num
+    elif a=='W':
+        x-=num
+    elif a=='L':
+        d = (d-num//90) % 4
+    elif a=='R':
+        d = (d+num//90) % 4
+    elif a=='F':
+        if d==0:
+            y-=num
+        elif d==1:
+            x+=num
+        elif d==2:
+            y+=num
+        elif d==3:
+            x-=num
+answer(abs(x)+abs(y))
+
+
+# PART 2
+x, y = 10, -1
+x2, y2=0, 0
+for l in lines:
+    a= l[0]
+    num = int(l[1:])
+    num %= 360
+    if a=='N':
+        y-=num
+    elif a=='S':
+        y+=num
+    elif a=='E':
+        x+=num
+    elif a=='W':
+        x-=num
+    elif a=='L':
+        if num==90:
+            x, y=y, -x
+        elif num==180:
+            x, y=-x, -y
+        elif num==270:
+            x, y=-y, x
+    elif a=='R':
+        if num==90:
+            x, y=-y, x
+        elif num==180:
+            x, y=-x, -y
+        elif num==270:
+            x, y=y, -x
+    elif a=='F':
+        x2+=x*num
+        y2+=y*num
+answer(abs(x2)+abs(y2))
 
