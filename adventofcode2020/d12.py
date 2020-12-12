@@ -25,7 +25,6 @@ except:
     example = r.text.split('<pre><code>')[1].split('</code></pre>')[0]
     open(EXAMPLE_FILE, 'w').write(example)
 
-
 def submit(ans):
     r = requests.get(f'https://adventofcode.com/{YEAR}/day/{DAY}', cookies={'session': AOC_COOKIE})
     if '<input type="hidden" name="level" value="' in r.text:
