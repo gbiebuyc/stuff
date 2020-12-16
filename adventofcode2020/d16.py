@@ -44,7 +44,6 @@ for _ in range(1000):
 					pp -= p
 ans=1
 for i in range(20):
-	val = list(possible[i])[0]
-	if val<6:
+	if list(possible[i])[0] < 6:
 		ans *= int(lines[22].split(',')[i])
 print(ans)
