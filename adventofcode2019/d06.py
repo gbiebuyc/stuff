@@ -15,18 +15,18 @@ def f(x):
 print(sum(f(x) for x in connections))
 
 # PART 2
-path=[]
+path={}
 cur='YOU'
+i=0
 while cur!='COM':
-    path.append(cur)
+    path[cur]=i
     cur = connections[cur]
+    i += 1
 cur='SAN'
 i=0
 while cur!='COM':
-    for j, other in enumerate(path):
-        if other==cur:
-            print(i+j-2)
-            exit(0)
+    if cur in path:
+        print(i + path[cur] - 2)
+        break
     cur = connections[cur]
     i += 1
-
