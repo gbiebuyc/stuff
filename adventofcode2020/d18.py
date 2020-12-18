@@ -17,9 +17,8 @@ print(sum(evaluate(l) for l in lines))
 
 # PART 2
 def evaluate2(expr):
-    print('-'*30)
     while ' ' in expr:
-        print(expr)
+        #print(expr)
         old = expr
         expr = re.sub(r'\(\d+ \+ \d+\)', replace, expr, count=1)
         if expr != old: continue
@@ -27,11 +26,19 @@ def evaluate2(expr):
         if expr != old: continue
         expr = re.sub(r'\(\d+ \* \d+\)', replace, expr, count=1)
         if expr != old: continue
+        expr = re.sub(r'\(\d+ \* \d+ \* \d+\)', replace, expr, count=1)
+        if expr != old: continue
+        expr = re.sub(r'\(\d+ \* \d+ \* \d+ \* \d+\)', replace, expr, count=1)
+        if expr != old: continue
+        expr = re.sub(r'\(\d+ \* \d+ \* \d+ \* \d+ \* \d+\)', replace, expr, count=1)
+        if expr != old: continue
+        expr = re.sub(r'\(\d+ \* \d+ \* \d+ \* \d+ \* \d+ \* \d+\)', replace, expr, count=1)
+        if expr != old: continue
         expr = re.sub(r'\d+ \* \d+', replace, expr, count=1)
         if expr != old: continue
         expr = re.sub(r'\(\d+\)', replace, expr, count=1)
         if expr != old: continue
-    print(expr)
+    #print(expr)
     return int(expr)
 
 print(sum(evaluate2(l) for l in lines))
