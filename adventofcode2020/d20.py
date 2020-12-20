@@ -70,18 +70,14 @@ print(corners[0] * corners[1] * corners[2] * corners[3])
 
 image = [[None]*IMAGE_SZ for _ in range(IMAGE_SZ)]
 tileY = topleft
-y = 0
-while y < IMAGE_SZ:
+for y in range(0, IMAGE_SZ, TILE_SZ):
     tileX = tileY
-    x = 0
-    while x < IMAGE_SZ:
+    for x in range(0, IMAGE_SZ, TILE_SZ):
         for yy, row in enumerate(tiles[tileX][1:-1]):
             for xx, cell in enumerate(row[1:-1]):
                 image[y+yy][x+xx] = cell
         tileX = borders[tileX][1]
-        x += TILE_SZ
     tileY = borders[tileY][2]
-    y += TILE_SZ
 image = rotate(image, 1)
 monster = ['                  # ',
            '#    ##    ##    ###',
@@ -89,9 +85,8 @@ monster = ['                  # ',
 MONSTER_NUM_CHARS = sum(row.count('#') for row in monster)
 
 num_monsters=0
-for _ in range(4):
-    imageNotFlipped = [row.copy() for row in image]
-    for flip in range(3):
+for image in (rotate(image, n) for n in range(4)):
+    for image in (image, flip_vertical(image), flip_horizontal(image)):
         for y in range(IMAGE_SZ - len(monster)):
             for x in range(IMAGE_SZ - len(monster[0])):
                 valid = 1
@@ -106,15 +101,8 @@ for _ in range(4):
                     num_monsters += 1
         if num_monsters:
             break
-        if flip == 0:
-            image = flip_vertical(imageNotFlipped)
-        elif flip == 1:
-            image = flip_horizontal(imageNotFlipped)
-        elif flip == 2:
-            image = imageNotFlipped
     if num_monsters:
         break
-    image = rotate(image, 1)
 IMAGE_NUM_CHARS = sum(row.count('#') for row in image)
 ans = IMAGE_NUM_CHARS - num_monsters * MONSTER_NUM_CHARS
 print(ans)
