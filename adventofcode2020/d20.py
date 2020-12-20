@@ -78,7 +78,6 @@ for y in range(0, IMAGE_SZ, TILE_SZ):
                 image[y+yy][x+xx] = cell
         tileX = borders[tileX][1]
     tileY = borders[tileY][2]
-image = rotate(image, 1)
 monster = ['                  # ',
            '#    ##    ##    ###',
            ' #  #  #  #  #  #   ']
