@@ -19,7 +19,25 @@ def createRegex(rule_key):
     regex = '('
     for token in rule.split():
         regex += '|' if token=='|' else createRegex(token)
-    return regex + ')'
+    regex += ')'
+    return regex
 
-r = createRegex('0')+'$'
-print(sum(bool(re.match(r, msg)) for msg in messages))
+regex0 = createRegex('0')+'$'
+print(sum(bool(re.match(regex0, msg)) for msg in messages))
+
+regex42 = createRegex('42')
+regex31 = createRegex('31')
+
+def part2_match_msg(msg):
+    rule42count = 0
+    while re.match('^'+regex42, msg):
+        msg = re.sub('^'+regex42, '', msg)
+        rule42count += 1
+    rule31count = 0
+    while re.match('^'+regex31, msg):
+        msg = re.sub('^'+regex31, '', msg)
+        rule31count += 1
+    return msg=='' and rule31count>=1 and rule42count>rule31count
+
+print(sum(part2_match_msg(msg) for msg in messages))
+
